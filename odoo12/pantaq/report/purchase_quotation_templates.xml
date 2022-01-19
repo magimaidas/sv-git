@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        RFQ: Report:
+        overridden:
+    -->
+    <template id="purchase.report_purchasequotation_document">
+        <!-- <t t-call="web.external_layout"> -->
+            <div class="page" style="font-size: 10pt;font-family:Helvetica,Verdana,Arial,sans,Lucida Grande,Calibri;">
+                <div class="header">
+                    <div class="row">
+                        <div class="col-6 text-left"/>
+                        <div class="col-6 text-left" style="padding:0px;">
+                            <img t-if="o.company_id.logo" t-att-src="image_data_uri(o.company_id.logo)" style="max-height: 100px; max-width: 400px;" alt="Logo"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="oe_structure"/>
+                <t t-set="o" t-value="o.with_context(lang=o.partner_id.lang)"/>
+                <table style="width:100%;">
+                  <tr>
+                    <td style="width:50%;">
+                        <!-- <div style="font-size: 2pt;color:#FFFFFF;">space</div> -->
+                        <h2>Request For Quotation</h2>
+                        <br/>
+                        <div style="margin-left: 40px;">
+                            <div t-field="o.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}'/>
+                            <t t-if="o.partner_id.vat">VAT: <span t-field="o.partner_id.vat"/></t>
+                            <br/>
+                            <br/>
+                            <p t-if="o.partner_id.attn_contact">
+                                <strong>Attention</strong>
+                                <br/>
+                                <span t-field="o.partner_id.attn_contact"/>
+                                <br/>
+                            </p>
+                            <p t-if="o.partner_id.phone">
+                                <strong>Telephone</strong>
+                                <br/>
+                                <span t-field="o.partner_id.phone"/>
+                                <br/>
+                            </p>
+                        </div>
+                    </td>
+                    <td style="width:15%;">
+                        <div style="font-size: 2pt;color:#FFFFFF;">space</div>
+                        <strong>RFQ Date</strong>
+                        <br/>
+                        <span t-field="o.date_order" t-options='{"format": "d MMM y"}'/>
+                        <br/>
+                        <br/>
+                        <strong>Closing Date</strong>
+                        <br/>
+                        <span t-field="o.date_planned" t-options='{"format": "d MMM y"}'/>
+                        <br/>
+                        <br/>
+                        <strong>RFQ Number</strong>
+                        <br/>
+                        <span t-field="o.name"/>
+                        <br/>
+                        <br/>
+                        <t t-if="o.lead_id">
+                            <strong>Reference</strong>
+                            <br/>
+                            <span t-field="o.lead_id.name"/>
+                            <br/>
+                        </t>
+                    </td>
+                    <td style="width:35%;">
+                        <div style="font-size: 2pt;color:#FFFFFF;">space</div>
+                        <br/>
+                        <br/>
+                        <div class="row">
+                            <div t-if="o.company_id and o.company_id.partner_id" name="billing_address">
+                                <t t-set="com" t-value="o.company_id.partner_id"/>
+                                <strong>Billing address:</strong><br/>
+                                <span t-field="com.name"/><br/>
+                                <span t-field="com.street"/>,<br/>
+                                <t t-if="com.street2"><span t-field="com.street2"/>, </t>
+                                <t t-if="com.city"><span t-field="com.city"/>, </t>
+                                <t t-if="com.state_id"><span t-field="com.state_id.name"/>, </t>
+                                <t t-if="com.zip"><span t-field="com.zip"/>, </t>
+                                <t t-if="com.name == 'Pantaq Ltd'">UK</t><t t-else="">USA</t><br/>
+                                <t t-if="com.vat">VAT: <span t-field="com.vat"/></t>
+                            </div>
+                        </div>
+                        <br/>
+                        <div class="row">
+                            <div t-if="o.picking_type_id and o.picking_type_id.warehouse_id" name="shipping_address">
+                                <t t-set="wh" t-value="o.picking_type_id.warehouse_id.partner_id"/>
+                                <strong>Shipping address:</strong><br/>
+                                <span t-field="wh.name"/><br/>
+                                <span t-field="wh.street"/>,<br/>
+                                <t t-if="wh.street2"><span t-field="wh.street2"/>, </t>
+                                <t t-if="wh.city"><span t-field="wh.city"/>, </t>
+                                <t t-if="wh.state_id"><span t-field="wh.state_id.name"/>, </t>
+                                <t t-if="wh.zip"><span t-field="wh.zip"/>, </t>
+                                <t t-if="wh.name == 'Pantaq Ltd'">UK</t><t t-else="">USA</t><br/>
+                                <div t-field="o.picking_type_id.warehouse_id.partner_id" t-options='{"widget": "contact", "fields": ["phone"], "no_marker": True, "phone_icons": True}'/>
+                            </div>
+                        </div>
+                    </td>
+                  </tr>
+                </table>
+                <t t-if="o.dest_address_id">
+                    <t t-set="information_block">
+                        <strong>Shipping address:</strong>
+                        <div t-field="o.dest_address_id"
+                            t-options='{"widget": "contact", "fields": ["address", "name", "phone"], "no_marker": True, "phone_icons": True}' name="purchase_shipping_address"/>
+                    </t>
+                </t>
+
+                <p/>
+                <p/>
+
+                <t t-set="i" t-value="1" />
+                <table style="width: 100%;border-collapse: collapse;border-bottom: 1px double black;" >
+                    <thead>
+                        <tr>
+                            <th class="text-left" style="border-bottom: 1px double black"><strong>S.No</strong></th>
+                            <th class="text-left" style="border-bottom: 1px double black"><strong>Description</strong></th>
+                            <th class="text-center" style="border-bottom: 1px double black"><strong>UOM</strong></th>
+                            <th class="text-right" style="border-bottom: 1px double black"><strong>Qty</strong></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid grey;" t-foreach="o.order_line" t-as="order_line">
+                            <td style="padding: 0.5rem;" class="text-center">
+                                <span t-esc="i"/>
+                                <t t-set="i" t-value="i+1"/>
+                            </td>
+                            <td style="padding: 0.5rem;" class="text-center">
+                                <span t-field="order_line.name"/>
+                            </td>
+                            <td style="padding: 0.5rem;" class="text-center">
+                                <t t-if="order_line.product_uom"><span t-field="order_line.product_uom.name"/></t>
+                            </td>
+                            <td style="padding: 0.5rem;" class="text-right">
+                                <span t-field="order_line.product_qty"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p t-field="o.notes"/>
+
+                <p style="page-break-after:always;">   </p>
+                <br/><br/>
+
+                <h1 style="color:#042a4f">Purchase Order <br/> Terms and Conditions</h1>
+                <p/>
+                <table style="width:100%">
+                    <tr>
+                        <td style="width:30%" class="text-center">
+                            <div t-if="o.name">
+                                <strong>RFQ Number</strong>
+                                <p t-field="o.name"/>
+                            </div>
+                        </td>
+                        <td style="width:30%" class="text-center">
+                            <div t-if="o.company_id.vat">
+                                <strong>Reference</strong>
+                                <p t-field="o.company_id.vat"/>
+                            </div>
+                        </td>
+                        <td style="width:30%" class="text-center">
+                            <div t-if="o.date_order">
+                                <strong>Date</strong>
+                                <p t-field="o.date_order" t-options='{"format": "d MMM y"}'/>
+                            </div>
+                        </td>
+
+                    </tr>
+                </table>
+                
+                <span>
+                <p t-field="o.terms_condition_id.terms_condition"/>
+                </span>
+                <div class="oe_structure"/>
+                <div class="footer o_standard_footer">
+                    <div class="text-center" style="border-top: 1px solid black;">
+                        <ul class="list-inline mb4">
+                            <li t-if="o.company_id.phone" class="list-inline-item">Phone: <span t-field="o.company_id.phone"/></li>
+                            <li t-if="o.company_id.email" class="list-inline-item">Email: <span t-field="o.company_id.email"/></li>
+                            <li t-if="o.company_id.website" class="list-inline-item">Web: <span t-field="o.company_id.website"/></li>
+                            <!-- <li t-if="o.company_id.vat" class="list-inline-item"><t t-esc="(o.company_id.vat_label or 'Tax ID').replace(' ','\N{NO-BREAK SPACE}')"/>: <span t-esc="o.company_id.vat.replace(' ','\N{NO-BREAK SPACE}')"/></li> -->
+                        </ul>
+
+                        <div name="financial_infos">
+                            <span t-field="o.company_id.report_footer"/>
+                        </div>
+
+                        <div t-if="report_type == 'pdf'" class="text-muted">
+                            Page: <span class="page"/> / <span class="topage"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <!-- </t> -->
+    </template>
+</odoo>
