@@ -1,0 +1,334 @@
+<record id="crm_lead_view_form" model="ir.ui.view">
+    <field name="name">crm.lead.form</field>
+    <field name="model">crm.lead</field>
+    <field name="arch" type="xml">
+        <form class="o_lead_opportunity_form" js_class="crm_form">
+            <header>
+                <button name="action_set_won_rainbowman" string="Mark Won"
+                        type="object" class="oe_highlight"
+                        attrs="{'invisible': ['|','|', ('active','=',False), ('probability', '=', 100), ('type', '=', 'lead')]}"/>
+                <button name="%(crm.crm_lead_lost_action)d" string="Mark Lost"
+                        type="action" class="oe_highlight" context="{'default_lead_id': active_id}"
+                        attrs="{'invisible': ['|', ('type', '=', 'lead'),('active', '=', False),('probability', '&lt;', 100)]}"/>
+                <button name="%(crm.action_crm_lead2opportunity_partner)d" string="Convert to Opportunity" type="action"
+                        help="Convert to Opportunity"
+                        class="oe_highlight"
+                        attrs="{'invisible': ['|', ('type', '=', 'opportunity'), ('active', '=', False)]}"/>
+                <button name="toggle_active" string="Restore" type="object"
+                        attrs="{'invisible': ['|', ('probability', '&gt;', 0), ('active', '=', True)]}"/>
+                <button name="action_set_lost" string="Mark as Lost" type="object"
+                        attrs="{'invisible': ['|', ('type', '=', 'opportunity'), '&amp;', ('probability', '=', 0), ('active', '=', False)]}"/>
+                <field name="stage_id" widget="statusbar"
+                       options="{'clickable': '1', 'fold_field': 'fold'}"
+                       domain="['|', ('team_id', '=', team_id), ('team_id', '=', False)]"
+                       attrs="{'invisible': ['|', ('active', '=', False), ('type', '=', 'lead')]}"/>
+            </header>
+            <div class="text-center alert alert-primary oe_edit_only" role="alert"
+                 attrs="{'invisible': ['|', ('ribbon_message', '=', False), ('ribbon_message', '=', '')]}">
+                <field name="ribbon_message"/>
+            </div>
+            <sheet>
+                <field name="active" invisible="1"/>
+                <div class="oe_button_box" name="button_box">
+                    <button name="action_schedule_meeting" type="object"
+                            class="oe_stat_button" icon="fa-calendar"
+                            context="{'partner_id': partner_id}"
+                            attrs="{'invisible': [('type', '=', 'lead')]}">
+                        <div class="o_stat_info">
+                            <field name="meeting_count" class="o_stat_value"/>
+                            <span class="o_stat_text" attrs="{'invisible': [('meeting_count', '&lt;', 2)]}">Meetings
+                            </span>
+                            <span class="o_stat_text" attrs="{'invisible': [('meeting_count', '&gt;', 1)]}">Meeting
+                            </span>
+                        </div>
+                    </button>
+                </div>
+                <widget name="web_ribbon" title="Lost" bg_color="bg-danger"
+                        attrs="{'invisible': ['|', ('probability', '&gt;', 0), ('active', '=', True)]}"/>
+                <widget name="web_ribbon" title="Won" attrs="{'invisible': [('probability', '&lt;', 100)]}"/>
+                <div class="oe_title">
+                    <label for="name" class="oe_edit_only" string="Lead"
+                           attrs="{'invisible': [('type', '=', 'opportunity')]}"/>
+                    <label for="name" class="oe_edit_only" attrs="{'invisible': [('type', '=', 'lead')]}"/>
+                    <h1>
+                        <field name="name" placeholder="e.g. Product Pricing"/>
+                    </h1>
+                    <h2 class="o_row no-gutters align-items-end">
+                        <div class="col" attrs="{'invisible': [('type', '=', 'lead')]}">
+                            <label for="expected_revenue" class="oe_edit_only"/>
+                            <div class="o_row">
+                                <field name="company_currency" invisible="1"/>
+                                <field name="expected_revenue" class="oe_inline" widget='monetary'
+                                       options="{'currency_field': 'company_currency'}"/>
+                                <span class="oe_grey p-2" groups="crm.group_use_recurring_revenues">+</span>
+                                <span class="oe_grey p-2" groups="!crm.group_use_recurring_revenues">at</span>
+                            </div>
+                        </div>
+                        <div class="col" attrs="{'invisible': [('type', '=', 'lead')]}"
+                             groups="crm.group_use_recurring_revenues">
+                            <div class="o_row">
+                                <field name="recurring_revenue" class="pr-2 oe_inline" widget="monetary"
+                                       options="{'currency_field': 'company_currency'}"/>
+                            </div>
+                        </div>
+                        <div class="col" attrs="{'invisible': [('type', '=', 'lead')]}"
+                             groups="crm.group_use_recurring_revenues">
+                            <div class="o_row">
+                                <field name="recurring_plan" class="oe_inline" placeholder="E.g. Monthly"
+                                       attrs="{'required': [('recurring_revenue', '!=', 0)]}"
+                                       options="{'no_create': True, 'no_open': True}"/>
+                                <span class="oe_grey p-2">at</span>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="oe_edit_only d-flex align-items-center">
+                                <label for="probability"/>
+                                <button class="btn btn-link" name="action_set_automated_probability" type="object"
+                                        attrs="{'invisible': [('is_automated_probability', '=', True)]}">
+                                    <i class="fa fa-gear" role="img" title="Switch to automatic probability"
+                                       aria-label="Switch to automatic probability"></i>
+                                </button>
+                                <small class="oe_grey h6 mb0"
+                                       attrs="{'invisible': [('is_automated_probability', '=', True)]}">
+                                    <field class="mb0" name="automated_probability" force_save="1"/>
+                                    %%
+                                </small>
+                            </div>
+                            <div id="probability" class="o_row d-flex">
+                                <field name="is_automated_probability" invisible="1"/>
+                                <field name="probability" widget="float" class="oe_inline"/>
+                                <span class="oe_grey">%%</span>
+                            </div>
+                        </div>
+                    </h2>
+                </div>
+                <group>
+                    <group name="lead_partner" attrs="{'invisible': [('type', '=', 'opportunity')]}">
+                        <!-- Preload all the partner's information -->
+                        <field name="partner_id" widget="res_partner_many2one"
+                               context="{
+                                        'default_name': contact_name,
+                                        'default_title': title,
+                                        'default_street': street,
+                                        'default_street2': street2,
+                                        'default_city': city,
+                                        'default_state_id': state_id,
+                                        'default_zip': zip,
+                                        'default_country_id': country_id,
+                                        'default_function': function,
+                                        'default_phone': phone,
+                                        'default_mobile': mobile,
+                                        'default_email': email_from,
+                                        'default_user_id': user_id,
+                                        'default_team_id': team_id,
+                                        'default_website': website,
+                                        'show_vat': True
+                                    }" groups="base.group_no_one"/>
+                        <field name="partner_name"/>
+                        <label for="street" string="Address"/>
+                        <div class="o_address_format">
+                            <field name="street" placeholder="Street..." class="o_address_street"/>
+                            <field name="street2" placeholder="Street 2..." class="o_address_street"/>
+                            <field name="city" placeholder="City" class="o_address_city"/>
+                            <field name="state_id" class="o_address_state" placeholder="State"
+                                   options='{"no_open": True}'/>
+                            <field name="zip" placeholder="ZIP" class="o_address_zip"/>
+                            <field name="country_id" placeholder="Country" class="o_address_country"
+                                   options='{"no_open": True, "no_create": True}'/>
+                        </div>
+                        <field name="website" widget="url" placeholder="e.g. https://www.odoo.com"/>
+                        <field name="lang_id"/>
+                    </group>
+
+                    <group name="opportunity_partner" attrs="{'invisible': [('type', '=', 'lead')]}">
+                        <field name="partner_id"
+                               widget="res_partner_many2one"
+                               string="Customer"
+                               context="{'res_partner_search_mode': type == 'opportunity' and 'customer' or False,
+                                        'default_name': contact_name or partner_name,
+                                        'default_street': street,
+                                        'default_is_company': type == 'opportunity' and contact_name == False,
+                                        'default_company_name': type == 'opportunity' and partner_name,
+                                        'default_street2': street2,
+                                        'default_city': city,
+                                        'default_title': title,
+                                        'default_state_id': state_id,
+                                        'default_zip': zip,
+                                        'default_country_id': country_id,
+                                        'default_function': function,
+                                        'default_phone': phone,
+                                        'default_mobile': mobile,
+                                        'default_email': email_from,
+                                        'default_user_id': user_id,
+                                        'default_team_id': team_id,
+                                        'default_website': website,
+                                        'show_vat': True,
+                                    }"
+                        />
+                        <field name="is_blacklisted" invisible="1"/>
+                        <field name="partner_is_blacklisted" invisible="1"/>
+                        <field name="phone_blacklisted" invisible="1"/>
+                        <field name="mobile_blacklisted" invisible="1"/>
+                        <field name="email_state" invisible="1"/>
+                        <field name="phone_state" invisible="1"/>
+                        <label for="email_from" class="oe_inline"/>
+                        <div class="o_row o_row_readonly">
+                            <button name="mail_action_blacklist_remove" class="fa fa-ban text-danger"
+                                    title="This email is blacklisted for mass mailings. Click to unblacklist."
+                                    type="object" context="{'default_email': email_from}" groups="base.group_user"
+                                    attrs="{'invisible': [('is_blacklisted', '=', False)]}"/>
+                            <field name="email_from" string="Email" widget="email"/>
+                        </div>
+                        <label for="phone" class="oe_inline"/>
+                        <div class="o_row o_row_readonly">
+                            <button name="phone_action_blacklist_remove" class="fa fa-ban text-danger"
+                                    title="This phone number is blacklisted for SMS Marketing. Click to unblacklist."
+                                    type="object" context="{'default_phone': phone}" groups="base.group_user"
+                                    attrs="{'invisible': [('phone_blacklisted', '=', False)]}"/>
+                            <field name="phone" widget="phone"/>
+                        </div>
+                    </group>
+                    <group name="lead_info" attrs="{'invisible': [('type', '=', 'opportunity')]}">
+                        <label for="contact_name"/>
+                        <div class="o_row">
+                            <field name="contact_name"/>
+                            <field name="title" placeholder="Title" domain="[]" options='{"no_open": True}'/>
+                        </div>
+                        <field name="is_blacklisted" invisible="1"/>
+                        <field name="phone_blacklisted" invisible="1"/>
+                        <field name="email_state" invisible="1"/>
+                        <field name="phone_state" invisible="1"/>
+                        <label for="email_from_group_lead_info" class="oe_inline"/>
+                        <div class="o_row o_row_readonly">
+                            <button name="mail_action_blacklist_remove" class="fa fa-ban text-danger"
+                                    title="This email is blacklisted for mass mailings. Click to unblacklist."
+                                    type="object" context="{'default_email': email_from}" groups="base.group_user"
+                                    attrs="{'invisible': [('is_blacklisted', '=', False)]}"/>
+                            <field name="email_from" id="email_from_group_lead_info" string="Email" widget="email"/>
+                        </div>
+                        <field name="email_cc" groups="base.group_no_one"/>
+                        <field name="function"/>
+                        <label for="phone_group_lead_info" class="oe_inline"/>
+                        <div class="o_row o_row_readonly">
+                            <button name="phone_action_blacklist_remove" class="fa fa-ban text-danger"
+                                    title="This phone number is blacklisted for SMS Marketing. Click to unblacklist."
+                                    type="object" context="{'default_phone': phone}" groups="base.group_user"
+                                    attrs="{'invisible': [('phone_blacklisted', '=', False)]}"/>
+                            <field name="phone" id="phone_group_lead_info" widget="phone"/>
+                        </div>
+                        <label for="mobile" class="oe_inline"/>
+                        <div class="o_row o_row_readonly">
+                            <button name="phone_action_blacklist_remove" class="fa fa-ban text-danger"
+                                    title="This phone number is blacklisted for SMS Marketing. Click to unblacklist."
+                                    type="object" context="{'default_phone': mobile}" groups="base.group_user"
+                                    attrs="{'invisible': [('mobile_blacklisted', '=', False)]}"/>
+                            <field name="mobile" widget="phone" string="Mobile"/>
+                        </div>
+                    </group>
+                    <group attrs="{'invisible': [('type', '=', 'lead')]}">
+                        <field name="date_deadline"/>
+                        <field name="priority" widget="priority"/>
+                        <field name="tag_ids" widget="many2many_tags"
+                               options="{'color_field': 'color', 'no_create_edit': True}"/>
+                    </group>
+                    <group>
+                        <field name="user_id" domain="[('share', '=', False)]"
+                               context="{'default_sales_team_id': team_id}" widget="many2one_avatar_user"/>
+                        <field name="team_id" widget="selection"
+                               domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]"/>
+                        <field name="type" invisible="1"/>
+                    </group>
+                    <group name="lead_priority" attrs="{'invisible': [('type', '=', 'opportunity')]}">
+                        <field name="priority" widget="priority"/>
+                        <field name="tag_ids" widget="many2many_tags"
+                               options="{'color_field': 'color', 'no_create_edit': True}"/>
+                    </group>
+                    <group name="opportunity_info" attrs="{'invisible': [('type', '=', 'lead')]}">
+                        <field name="lost_reason" attrs="{'invisible': [('active', '=', True)]}"/>
+                        <field name="date_conversion" invisible="1"/>
+                        <field name="company_id" groups="base.group_multi_company"/>
+                    </group>
+                </group>
+
+                <notebook>
+                    <page string="Internal Notes" name="internal_notes">
+                        <field name="description" placeholder="Add a description..."/>
+                    </page>
+                    <page name="extra" string="Extra Info" attrs="{'invisible': [('type', '=', 'opportunity')]}">
+                        <group>
+                            <group string="Email" groups="base.group_no_one">
+                                <field name="message_bounce" readonly="1"/>
+                            </group>
+                            <group string="Tracking" name="categorization">
+                                <field name="company_id"
+                                       groups="base.group_multi_company"
+                                       options="{'no_create': True}"/>
+                                <field name="campaign_id"/>
+                                <field name="medium_id"/>
+                                <field name="source_id"/>
+                                <field name="referred"/>
+                            </group>
+                            <group string="Analysis">
+                                <field name="date_open"/>
+                                <field name="date_closed"/>
+                            </group>
+                        </group>
+                    </page>
+                    <page name="lead" string="Extra Information" attrs="{'invisible': [('type', '=', 'lead')]}">
+                        <group>
+                            <group string="Contact Information">
+                                <field name="partner_name"/>
+                                <label for="street_page_lead" string="Address"/>
+                                <div class="o_address_format">
+                                    <field name="street" id="street_page_lead" placeholder="Street..."
+                                           class="o_address_street"/>
+                                    <field name="street2" placeholder="Street 2..." class="o_address_street"/>
+                                    <field name="city" placeholder="City" class="o_address_city"/>
+                                    <field name="state_id" class="o_address_state" placeholder="State"
+                                           options='{"no_open": True}'/>
+                                    <field name="zip" placeholder="ZIP" class="o_address_zip"/>
+                                    <field name="country_id" placeholder="Country" class="o_address_country"
+                                           options='{"no_open": True, "no_create": True}'/>
+                                </div>
+                                <field name="website" widget="url" placeholder="e.g. https://www.odoo.com"/>
+                                <field name="lang_id" options="{'no_create': True}"/>
+                            </group>
+                            <group class="mt48">
+                                <label for="contact_name_page_lead"/>
+                                <div class="o_row">
+                                    <field name="contact_name" id="contact_name_page_lead"/>
+                                    <field name="title" placeholder="Title" domain="[]" options='{"no_open": True}'/>
+                                </div>
+                                <field name="function"/>
+                                <label for="mobile_page_lead" class="oe_inline"/>
+                                <div class="o_row o_row_readonly">
+                                    <button name="phone_action_blacklist_remove" class="fa fa-ban text-danger"
+                                            title="This phone number is blacklisted for SMS Marketing. Click to unblacklist."
+                                            type="object" context="{'default_phone': mobile}" groups="base.group_user"
+                                            attrs="{'invisible': [('mobile_blacklisted', '=', False)]}"/>
+                                    <field name="mobile" id="mobile_page_lead" widget="phone"/>
+                                </div>
+                            </group>
+                            <group string="Marketing">
+                                <field name="campaign_id"/>
+                                <field name="medium_id"/>
+                                <field name="source_id"/>
+                            </group>
+                            <group string="Misc" name="Misc">
+                                <field name="day_open" groups="base.group_no_one"/>
+                                <field name="day_close" groups="base.group_no_one"/>
+                                <field name="referred"/>
+                                <field name="type" invisible="1"/>
+                            </group>
+                        </group>
+                    </page>
+                </notebook>
+            </sheet>
+            <div class="oe_chatter">
+                <field name="message_follower_ids"/>
+                <field name="activity_ids"/>
+                <field name="message_ids" options="{'post_refresh': 'recipients'}"/>
+            </div>
+        </form>
+    </field>
+</record>

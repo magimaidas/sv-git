@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!--
+        Stages for Lead/Enquiry:
+        Overridden:
+    -->
+    <record model="crm.stage" id="stage_lead1">
+        <field name="name">New</field>
+        <field name="sequence">0</field>
+    </record>
+    <record model="crm.stage" id="pq_stage_lead2">
+        <field name="name">Assigned</field>
+        <field name="sequence">1</field>
+    </record>
+
+    <record model="crm.stage" id="crm.stage_lead2">
+        <field name="name">Waiting for Quotation</field>
+        <field name="sequence">2</field>
+    </record>
+    <record model="crm.stage" id="crm.stage_lead3">
+        <field name="name">Quotation Received</field>
+        <field name="sequence">3</field>
+    </record>
+    <record model="crm.stage" id="crm.stage_lead4">
+        <field name="name">Customer Quote Sent</field>
+        <field name="fold" eval="False"/>
+        <field name="sequence">4</field>
+    </record>
+    <record model="crm.stage" id="pq_stage_lead6">
+        <field name="name">Expired</field>
+        <field name="fold" eval="True"/>
+        <field name="sequence">5</field>
+    </record>
+    <record model="crm.stage" id="pq_stage_lead7">
+        <field name="name">Couldn't Respond</field>
+        <field name="fold" eval="True"/>
+        <field name="sequence">6</field>
+    </record>
+    <record model="crm.stage" id="pq_stage_lead8">
+        <field name="name">Rejected</field>
+        <field name="fold" eval="True"/>
+        <field name="sequence">7</field>
+    </record>
+    <record model="crm.stage" id="pq_stage_lead9">
+        <field name="name">Cancelled</field>
+        <field name="fold" eval="True"/>
+        <field name="sequence">10</field>
+    </record>
+</odoo>

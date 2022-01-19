@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+
+    <!--This group is to show Customer Quotation menu to only SE users-->
+    <record id="group_see_executives_customer_quotes" model="res.groups">
+        <field name="name">Show Customer Quotation menu for Executives</field>
+        <field name="category_id" ref="base.module_category_hidden"/>
+    </record>
+
+    <!--
+        Multi - Salesmen sales order assignation rules : overridden
+        [Sales executives can see all SOs & CQs created by all executives]
+    -->
+    <record id="sale.sale_order_personal_rule" model="ir.rule">
+        <field name="name">All SOs and CQs</field>
+        <field ref="model_sale_order" name="model_id"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('sales_team.group_sale_salesman'))]"/>
+    </record>
+
+    <!--
+        Lead (Enquiry): record rule for Sales Executives
+    -->
+    <record id="crm.crm_rule_personal_lead" model="ir.rule">
+        <field name="name">Own Enquiries, except hidden from executives TRUE</field>
+        <field ref="model_crm_lead" name="model_id"/>
+        <field name="domain_force">['|',('user_id','=',user.id),('user_id','=',False),('hide_from_executives','=',False)]</field>
+        <field name="groups" eval="[(4, ref('sales_team.group_sale_salesman'))]"/>
+    </record>
+
+    <!--
+        Lead (Enquiry): record rule for Sales Manager
+    -->
+    <record id="crm.crm_rule_all_lead" model="ir.rule">
+        <field name="name">Team Enquiries</field>
+        <field ref="model_crm_lead" name="model_id"/>
+        <field name="domain_force">['|','|',('user_id','=',user.id),('user_id','=',False),('user_id.sale_team_id','=',user.sale_team_id.id)]</field>
+        <field name="groups" eval="[(4, ref('sales_team.group_sale_salesman_all_leads'))]"/>
+    </record>
+
+    <!--
+        Lead (Enquiry): access for Purchase Users
+    -->
+    <record id="pq_crm_rule_all_submitted_assigned_enquiries" model="ir.rule">
+        <field name="name">Assigned to him [Purchase]</field>
+        <field ref="model_crm_lead" name="model_id"/>
+        <field name="domain_force">[('state','=','done'),('assign_id','=',user.id)]</field>
+        <field name="groups" eval="[(4, ref('purchase.group_purchase_user'))]"/>
+    </record>
+    <record id="pq_crm_rule_all_submitted_enquiries" model="ir.rule">
+        <field name="name">All submitted enquiries [Purchase]</field>
+        <field ref="model_crm_lead" name="model_id"/>
+        <field name="domain_force">[('state','!=','draft')]</field>
+        <field name="groups" eval="[(4, ref('purchase.group_purchase_manager'))]"/>
+    </record>
+
+</odoo>
