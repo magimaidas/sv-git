@@ -528,7 +528,7 @@
             </field>
         </record>
 
-        <record model="ir.ui.view" id="view_crm_enquiry_graph">
+        <record model="ir.ui.view" id="crm_lead_view_graph">
             <field name="name">crm.lead.view.graph</field>
             <field name="model">crm.lead</field>
             <field name="inherit_id" ref="crm.crm_lead_view_graph"/>
@@ -593,7 +593,7 @@
         <record id="crm.crm_lead_view_graph" model="ir.actions.act_window.view">
             <field name="sequence" eval="3"/>
             <field name="view_mode">graph</field>
-            <field name="view_id" ref="pantaq.view_crm_enquiry_graph"/>
+            <field name="view_id" ref="crm.crm_lead_view_graph"/>
             <field name="act_window_id" ref="crm.crm_case_tree_view_oppor"/>
         </record>
 
