@@ -1,6 +1,7 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_pq_enquiry_lines,pq.enquiry.lines,model_pq_enquiry_lines,,1,1,1,1
 access_account_payment_term_line,account_payment_term_line,account.model_account_payment_term_line,,1,1,1,1
+access_pq_wiz_rfq_productcompare,pq.wiz.rfq.productcompare,model_pq_wiz_rfq_productcompare,,1,1,1,1
 sale.access_product_pricelist_sale_user,product.pricelist.sale.user,product.model_product_pricelist,sales_team.group_sale_salesman,1,1,0,0
 
 access_internal_order_baseuser,internal_order,model_internal_order,base.group_user,1,0,0,0

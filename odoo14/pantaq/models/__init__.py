@@ -8,3 +8,4 @@ from . import terms_condition
 from . import sale
 from . import account_invoice
 from . import product_template
+from . import stock_picking

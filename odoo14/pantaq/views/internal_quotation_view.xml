@@ -250,7 +250,7 @@
                                     <field name="sales_price_cost" string="Cost" groups="sales_team.group_sale_salesman"/>
                                     <!--<field name="price_subtotal" widget="monetary"/> todo -->
                                     <field name="price_subtotal" />
-                                    <field name="target_price" widget="monetary" options="{'currency_field': 'target_currency_id'}"
+                                    <field name="target_price" widget="monetary" options="{'currency_field':     'target_currency_id'}"
                                             help="Target Price/Cost quoted by the Customer" string="Target Cost" invisible="1"/>
                                     <field name="target_currency_id" invisible="1"/>
                                     <field name="state" invisible="1"/>

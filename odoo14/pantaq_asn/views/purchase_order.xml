@@ -1,13 +1,14 @@
 <odoo>
     <data>
-        <record id="pq_view_purchase_order_tree_inherit" model="ir.ui.view">
+        <record id="pq_view_purchase_order_form_inherit" model="ir.ui.view">
             <field name="name">pq_view_purchase_order_form_inherit</field>
             <field name="model">purchase.order</field>
             <field name="inherit_id" ref="purchase.purchase_order_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//header" position="inside">
+                    <field name="asn_done" invisible="1"/>
                     <button name="create_asn" string="Create ASN" type="object" class="oe_highlight"
-                            attrs="{'invisible': ['|', '|' , ('is_shipped', '=', True), ('state','not in', ('purchase','done')), ('picking_count', '=', 0)]}"/>
+                            attrs="{'invisible': [('asn_done','=',True)]}"/>
                 </xpath>
             </field>
         </record>
@@ -22,6 +23,7 @@
                     <field name="carrier" string="Carrier"/>
                     <field name="arrival_date" string="Arrival Date"/>
                     <field name="location" string="Location"/>
+                    <field name="state" string="State"/>
                 </tree>
             </field>
         </record>
@@ -39,8 +41,8 @@
                         <group>
                             <field name="desc"/>
                             <field name="purchase_id" invisible="1"/>
-<!--                            <field name="lot" context="{'default_product_id': product_id}"-->
-<!--                                   options="{'create': [('parent.use_create_lots', '=', True)]}"/>-->
+                            <!--                            <field name="lot" context="{'default_product_id': product_id}"-->
+                            <!--                                   options="{'create': [('parent.use_create_lots', '=', True)]}"/>-->
 
                             <!--                            <field name="lot" widget="many2many_tags"-->
                             <!--                                   groups="stock.group_production_lot"-->
@@ -72,6 +74,10 @@
             <field name="model">purchase.asn</field>
             <field name="arch" type="xml">
                 <form string="Purchase Order" class="o_purchase_order">
+                    <header>
+                        <button name="inspect_asn" string="Inspect" type="object" class="oe_highlight"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,inspection,done"/>
+                    </header>
                     <sheet>
                         <field name="state" invisible="1"/>
                         <div class="oe_title">
@@ -91,6 +97,7 @@
                                 <field name="arrival_date"/>
                                 <field name="location"/>
                                 <field name="reference" invisible="1"/>
+                                <field name="picking_id" invisible="1"/>
                             </group>
                         </group>
                         <notebook>
@@ -100,14 +107,14 @@
                                        mode="tree,kanban"
                                        context="{'default_state': 'draft'}"
                                        attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}">
-                                    <tree string="Product details">
+                                    <tree string="Product details" options="{'no_create': False}">
                                         <field name="purchase_id" invisible="1"/>
                                         <field name="product_id"/>
                                         <field name="desc"/>
                                         <field name="quantity"/>
-                                        <field name="lot"/>
-                                        <button name="action_asn_show_details" type="object" icon="fa-list" width="0.1"
-                                    options="{&quot;warn&quot;: true}"/>
+                                        <!--                                        <field name="lot"/>-->
+                                        <!--                                        <button name="action_asn_show_details" type="object" icon="fa-list" width="0.1"-->
+                                        <!--                                                options="{&quot;warn&quot;: true}"/>-->
                                     </tree>
                                 </field>
                             </page>
@@ -130,6 +137,23 @@
                         <field name="asn_count" widget="statinfo" string="ASN" help="Advance Shipping Note"/>
                     </button>
                 </xpath>
+            </field>
+        </record>
+
+        <record id="purchase_order_view_form_inherit_1" model="ir.ui.view">
+            <field name="name">purchase.order.form.inherit1</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase_stock.purchase_order_view_form_inherit"/>
+            <field name="arch" type="xml">
+                <xpath expr="//header/button[@name='action_view_picking']" position="replace">
+                    <button name="action_view_picking" string="Receive Products" class="oe_highlight" type="object"
+                            attrs="{'invisible': ['|', '|' ,'|', ('is_shipped', '=', True),('asn_count','=',0), ('state','not in', ('purchase','done')), ('picking_count', '=', 0)]}"/>
+                </xpath>
+                <!--                <xpath>-->
+                <!--                    <button name="button_confirm" type="object" states="sent" string="Confirm Order" attrs="{'invisible': [('state', '=', True)]}"-->
+                <!--                            class="oe_highlight" id="bid_confirm"/>-->
+
+                <!--                </xpath>-->
             </field>
         </record>
     </data>

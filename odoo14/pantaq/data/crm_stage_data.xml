@@ -5,10 +5,10 @@
         Stages for Lead/Enquiry:
         Overridden:
     -->
-    <record model="crm.stage" id="stage_lead1">
-        <field name="name">New</field>
-        <field name="sequence">0</field>
-    </record>
+<!--    <record model="crm.stage" id="stage_lead1">-->
+<!--        <field name="name">New</field>-->
+<!--        <field name="sequence">0</field>-->
+<!--    </record>-->
     <record model="crm.stage" id="pq_stage_lead2">
         <field name="name">Assigned</field>
         <field name="sequence">1</field>

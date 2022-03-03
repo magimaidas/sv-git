@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "pantaq_wrf",
+    'name': "pantaq_asn",
 
     'summary': """
         Short (1 phrase/line) summary of the module's purpose, used as
@@ -16,11 +16,11 @@
     # Categories can be used to filter modules in modules listing
     # Check https://github.com/odoo/odoo/blob/14.0/odoo/addons/base/data/ir_module_category_data.xml
     # for the full list
-    'category': 'Uncategorized',
+    'category': 'Purchase',
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'pantaq', 'purchase','stock'],
+    'depends': ['base', 'pantaq','purchase','purchase_stock','delivery','stock'],
 
     # always loaded
     'data': [

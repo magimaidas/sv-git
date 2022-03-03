@@ -226,7 +226,6 @@ class ProductCompare(models.TransientModel):
                 'wiz_id'     : self.id,
                 'rfqline_id' : ln.id,
                 'currency_id': self.currency_id.id,
-
                 'price_subtotal': ln.price_subtotal,
                 'price_total'   : ln.price_total,
                 'target_price': ln.target_price,

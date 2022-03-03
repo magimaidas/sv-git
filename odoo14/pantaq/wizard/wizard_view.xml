@@ -35,9 +35,9 @@
                     <group>
                         <notebook>
                             <page string="Suppliers">
-                                <!--<label string="Set Supplier here to send RFQ for all the products." colspan="4"/>-->
-                                <field name="partner_ids" context="{'search_default_supplier':1, 'default_supplier':1, 'default_customer':0, 'show_address': 1}">
-                                    <tree create="true">
+                                <label for="partner_ids" string="Set Supplier here to send RFQ for all the products." colspan="4"/>
+                                <field name="partner_ids" context="{'search_default_is_company':True}">
+                                    <tree create="false">
                                         <field name="name"/>
                                         <field name="phone"/>
                                         <field name="email"/>
