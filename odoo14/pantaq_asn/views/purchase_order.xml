@@ -13,6 +13,30 @@
             </field>
         </record>
 
+        <record id="pantaq_view_pq_rfq_form_inherit" model="ir.ui.view">
+            <field name="name">pq_view_purchase_order_form_inherit1</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="pantaq.view_pq_rfq_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//header" position="inside">
+                    <field name="asn_done" invisible="1"/>
+                    <button name="create_asn" string="Create ASN" type="object" class="oe_highlight"
+                            attrs="{'invisible': ['|',('asn_done','=',True),('state','not in','purchase')]}"/>
+                </xpath>
+                <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                    <button type="object"
+                            name="action_view_asn"
+                            class="oe_stat_button"
+                            icon="fa-font" attrs="{'invisible':[('asn_count','=',0)]}">
+                        <field name="asn_count" widget="statinfo" string="ASN" help="Advance Shipping Note"/>
+                    </button>
+                </xpath>
+                <xpath expr="//field[@name='currency_id']" position="after">
+                    <field name="rfq_ref" string="RFQ Reference"/>
+                </xpath>
+            </field>
+        </record>
+
         <record id="pq_view_purchase_asn_tree" model="ir.ui.view">
             <field name="name">pq_view_purchase_asn_tree</field>
             <field name="model">purchase.asn</field>
@@ -41,6 +65,7 @@
                         <group>
                             <field name="desc"/>
                             <field name="purchase_id" invisible="1"/>
+                            <field name="state" readonly="1"/>
                             <!--                            <field name="lot" context="{'default_product_id': product_id}"-->
                             <!--                                   options="{'create': [('parent.use_create_lots', '=', True)]}"/>-->
 
@@ -106,15 +131,28 @@
                                        widget="section_and_note_one2many"
                                        mode="tree,kanban"
                                        context="{'default_state': 'draft'}"
-                                       attrs="{'readonly': [('state', 'in', ('done', 'cancel'))]}">
-                                    <tree string="Product details" options="{'no_create': False}">
+                                       attrs="{'readonly': [('state', 'in', ('done', 'scrap','return'))]}">
+                                    <tree string="Product details" options="{'no_create': False}" editable="bottom">
                                         <field name="purchase_id" invisible="1"/>
                                         <field name="product_id"/>
                                         <field name="desc"/>
                                         <field name="quantity"/>
+                                        <field name="state"/>
                                         <!--                                        <field name="lot"/>-->
                                         <!--                                        <button name="action_asn_show_details" type="object" icon="fa-list" width="0.1"-->
                                         <!--                                                options="{&quot;warn&quot;: true}"/>-->
+                                        <button name="button_approve" help="Click for Done"
+                                                attrs="{'invisible': [('parent.state', 'in', ('draft','done'))]}"
+                                                string="Done"
+                                                type="object" icon="fa-check"/>
+                                        <button name="button_scrap" help="Click for Scrap"
+                                                attrs="{'invisible': [('parent.state', 'in', ('draft','done'))]}"
+                                                string="Scrap"
+                                                type="object" icon="fa-times"/>
+                                        <button name="button_return" help="Click for Return"
+                                                attrs="{'invisible': [('parent.state', 'in', ('draft','done'))]}"
+                                                string="Return"
+                                                type="object" icon="fa-reply"/>
                                     </tree>
                                 </field>
                             </page>

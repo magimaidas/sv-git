@@ -13,6 +13,7 @@ class PurchaseOrder(models.Model):
                               states={'cancel': [('readonly', True)], 'done': [('readonly', True)]}, copy=True)
     asn_count = fields.Integer(compute='_compute_asn', string='ASN count', default=0, store=True)
     asn_done = fields.Boolean(string='ASN Done?', default=False, compute='_compute_asn_done',store=True)
+    rfq_ref = fields.Many2one('purchase.order',string="RFQ Reference")
 
     @api.depends('asn_count')
     def _compute_asn_done(self):
@@ -22,6 +23,27 @@ class PurchaseOrder(models.Model):
                 flag = False
         if flag:
             self.asn_done = True
+
+    def button_confirm(self):
+        for order in self:
+
+            if order.state not in ['draft', 'sent','qtn_received','rfq_revised']:
+                continue
+            if order.po_type == 'rfq':
+                new_order = order.copy()
+                new_order.rfq_ref = new_order.id
+                order.po_type = 'purchase'
+                order.name = self.env['ir.sequence'].next_by_code('purchase.order') or '/'
+
+            order._add_supplier_to_product()
+            # Deal with double validation process
+            if order._approval_allowed():
+                order.button_approve()
+            else:
+                order.write({'state': 'to approve'})
+            if order.partner_id not in order.message_partner_ids:
+                order.message_subscribe([order.partner_id.id])
+        return True
 
     def create_asn(self):
         return {

@@ -17,7 +17,30 @@ class pantaq_asn(models.Model):
     quantity = fields.Integer(string='Quantity')
     purchase_id = fields.Many2one('purchase.asn', default=_default_get_po_id, index=True, required=True,
                                   ondelete='cascade')
-    lot = fields.Many2one('stock_production_lot', string='LOT/Serial', ondelete='restrict')
+    state = fields.Selection([('draft','Draft'),('done', 'Done'), ('scrap', 'Scrap'), ('return', 'Return')], string='Status',
+                             required=True, readonly=True, default='draft')
+
+    def button_approve(self):
+        if self:
+            self.state = 'done'
+
+    def button_scrap(self):
+        if self:
+            self.state = 'scrap'
+            scrap = self.env['stock.scrap']
+            vals = {}
+            vals['product_id'] = self.product_id.id
+            vals['scrap_qty'] = self.quantity
+            vals['origin'] = self.purchase_id.name
+            vals['company_id'] = self.env.user.company_id.id
+            vals['date_done'] = fields.Datetime.now()
+            vals['product_uom_id'] = self.product_id.uom_id.id
+            scrap.create(vals)
+
+    def button_return(self):
+        if self:
+            self.state = 'return'
+
 
     def action_asn_show_details(self):
         """ Returns an action that will open a form view (in a popup) allowing to work on all the
@@ -83,6 +106,7 @@ class pantaq_asn(models.Model):
 
     def inspect_asn(self):
         print("Inspecting ASN")
+
 
     @api.model
     def create(self, vals):
@@ -157,8 +181,8 @@ class pantaq_asn(models.Model):
                     'origin': ref.name,
                     'state': 'draft',
                 })
-            conf = picking.action_confirm()
-            assign = conf._action_assign()
+            # conf = result.action_confirm()
+            # assign = conf._action_assign()
             vals['picking_id'] = result.id
             return super(pantaq_asn, self).create(vals)
         else:
@@ -180,3 +204,9 @@ class pantaq_asn(models.Model):
             vals['purchase_id'] = purchase_id
             lines.append((0, 0, vals))
         self.order_line = lines
+
+class pantaq_asn_inspection(models.Model):
+    _name = 'purchase.asn.inspection'
+    _description = 'ASN Inspection'
+
+
