@@ -36,7 +36,7 @@
                         <notebook>
                             <page string="Suppliers">
                                 <label for="partner_ids" string="Set Supplier here to send RFQ for all the products." colspan="4"/>
-                                <field name="partner_ids" context="{'search_default_is_company':True}">
+                                <field name="partner_ids" context="{'search_default_is_company':1, 'default_is_company':1, 'default_customer':0}">
                                     <tree create="false">
                                         <field name="name"/>
                                         <field name="phone"/>
@@ -189,6 +189,7 @@
                 <tree string="RFQ Products" create="false" delete="false" decoration-info="rfq_status=='approved'">
                     <field name="order_id" string="RFQ Ref."/>
                     <field name="lead_id"/>
+                    <field name="sequence" invisible="1"/>
                     <field name="partner_id"/>
                     <field name="product_id" context="{'partner_id': parent.partner_id}"/>
                     <field name="name"/>

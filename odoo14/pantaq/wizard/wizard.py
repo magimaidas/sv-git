@@ -220,8 +220,8 @@ class ProductCompare(models.TransientModel):
         polnIDs = poln_obj.browse(lnids)
 
         for ln in polnIDs:
-            vals = ln.copy_data()
-            vals = vals and vals[0] or {}
+            # vals = ln.copy_data()
+            vals = {}
             vals.update({
                 'wiz_id'     : self.id,
                 'rfqline_id' : ln.id,
@@ -229,6 +229,16 @@ class ProductCompare(models.TransientModel):
                 'price_subtotal': ln.price_subtotal,
                 'price_total'   : ln.price_total,
                 'target_price': ln.target_price,
+                'order_id': ln.order_id.id,
+                'lead_id': ln.order_id.lead_id.id,
+                'partner_id': ln.partner_id.id,
+                'product_id': ln.product_id.id,
+                'name': ln.product_id.name,
+                'company_id': ln.company_id.id,
+                'enqln_qty': ln.enqline_id.product_uom_qty,
+                'product_qty': ln.product_qty,
+                'interval': ln.interval,
+                'price_unit': ln.price_unit,
                 })
             print("Price",ln.price_subtotal)
             print("Target Price",ln.target_price)
@@ -298,7 +308,7 @@ class ProductCompareLines(models.TransientModel):
     currency_id  = fields.Many2one('res.currency', string='Currency', readonly=True)
     interval = fields.Integer(string="Lead Time",group_operator=False)
     rule_type = fields.Selection([('days', 'Day(s)'), ('weeks', 'Week(s)'), ('months', 'Month(s)')], string="Lead Time Rule", default='days')
-
+    sequence = fields.Integer(string="Sequence", readonly=True, invisible=True)
 
     
     def button_toggle_approve(self):
