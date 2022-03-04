@@ -29,7 +29,7 @@
     <record id="action_crm_lead_submitted_to_purchase_team_kanban" model="ir.actions.act_window.view">
         <field name="sequence" eval="0"/>
         <field name="view_mode">kanban</field>
-        <!--        <field name="view_id" ref="view_crm_enquiry_kanban"/>-->
+<!--        <field name="view_id" ref="view_crm_enquiry_kanban"/>-->
         <field name="act_window_id" ref="action_crm_lead_submitted_to_purchase_team"/>
     </record>
 
@@ -50,7 +50,7 @@
     <record id="action_crm_lead_submitted_to_purchase_team_graph" model="ir.actions.act_window.view">
         <field name="sequence" eval="3"/>
         <field name="view_mode">graph</field>
-        <field name="view_id" ref="pantaq.view_crm_enquiry_graph"/>
+<!--        <field name="view_id" ref="pantaq.view_crm_enquiry_graph"/>-->
         <field name="act_window_id" ref="action_crm_lead_submitted_to_purchase_team"/>
     </record>
 
@@ -113,6 +113,9 @@
                     <!--<button name="button_create_InternalQtn" type="object" states="sent,qtn_received" string="Create Internal Qtn" class="oe_highlight" id="create_internalqtn"/>-->
                     <button name="button_modify_rfq" states="sent,qtn_received" string="Revise RFQ" type="object"
                             class="oe_highlight"/>
+                    <button name="button_confirm" type="object" string="Confirm Order"
+                            attrs="{'invisible': [('state', 'not in', ('qtn_received', 'rfq_revised'))]}"
+                            class="oe_highlight" id="bid_confirm"/>
 
                     <field name="state" widget="statusbar" statusbar_visible="draft,sent,qtn_received" readonly="1"/>
                 </header>
@@ -450,7 +453,8 @@
                             context="{'send_rfq':False}" class="oe_highlight"/>
                     <button name="print_quotation" string="Print PO" type="object" states="draft" class="oe_highlight"
                             groups="base.group_user"/>
-                    <button name="button_confirm" type="object" states="sent" string="Confirm Order"
+                    <button name="button_confirm" type="object" string="Confirm Order"
+                            attrs="{'invisible': [('state', 'in', ('purchase', 'done'))]}"
                             class="oe_highlight" id="bid_confirm"/>
                     <button name="button_approve" type="object" states='to approve' string="Approve Order"
                             class="oe_highlight" groups="purchase.group_purchase_manager"/>
@@ -758,9 +762,9 @@
     <!--    <menuitem action="action_make_internalQtn4Prods" id="menu_action_pq_rfqprodcompare"-->
     <!--              parent="purchase.menu_procurement_management" name="RFQ Products price Compare"-->
     <!--              sequence="9"/>-->
-    <menuitem action="action_make_internalQtn4Prods" id="menu_action_pq_rfqprodcompare"
+    <menuitem action="action_rfqprodcompare_form" id="menu_action_pq_rfqprodcompare"
               parent="purchase.menu_procurement_management" name="RFQ Products price Compare"
-              sequence="2"/>
+              sequence="9"/>
 
     <!--
         Create IQ : (Client action)
@@ -776,5 +780,4 @@
             action = env['pq.wiz.rfq.productcompare.lines'].browse(env.context['active_ids']).action_process_RFQLines()
         </field>
     </record>
-
 </odoo>

@@ -13,7 +13,7 @@ from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
 class PurchaseOrder(models.Model):
     _inherit = "purchase.order"
 
-    @api.depends('order_line.product_id')
+    # @api.depends('order_line.product_id')
     def check_product_availability(self):
         for line in self:
             count = 0
