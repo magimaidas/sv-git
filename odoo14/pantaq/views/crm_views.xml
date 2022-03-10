@@ -40,8 +40,7 @@
             <field name="model">crm.lead</field>
             <field name="priority" eval="1"/>
             <field name="arch" type="xml">
-                <kanban default_group_by="stage_id" class="o_kanban_small_column"
-                        archivable="false">
+                <kanban class="o_kanban_mobile" archivable="false" js_class="crm_kanban" sample="1">
                     <field name="stage_id" readonly="1"
                            options='{"group_by_tooltip": {"requirements": "Description"}}'/>
                     <field name="color"/>
