@@ -17,7 +17,6 @@ class PurchaseOrder(models.Model):
     rfq_ref = fields.Many2one('purchase.order', string="RFQ Reference")
     po_ref = fields.Many2one('purchase.order', string="PO Reference")
 
-
     @api.depends('asn_count')
     def _compute_asn_done(self):
         flag = True
@@ -42,7 +41,7 @@ class PurchaseOrder(models.Model):
                 res = self.env['purchase.order.line'].browse(lines_remove).sudo().unlink()
                 new_order.update({
                     'state': 'done',
-                    'po_ref' : order.id,
+                    'po_ref': order.id,
                 })
                 order.rfq_ref = new_order.id
                 order.po_type = 'purchase'

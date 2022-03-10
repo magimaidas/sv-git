@@ -14,9 +14,9 @@
                 <xpath expr="//field[@name='currency_id']" position="after">
                     <field name="rfq_ref" string="RFQ Reference" attrs="{'invisible':[('rfq_ref','=',False)]}"/>
                 </xpath>
-                <xpath expr="//field[@name='currency_id']" position="after">
-                    <field name="po_ref" string="PO Reference" attrs="{'invisible':[('po_ref','=',False)]}"/>
-                </xpath>
+<!--                <xpath expr="//field[@name='currency_id']" position="after">-->
+<!--                    <field name="po_ref" string="PO Reference" attrs="{'invisible':[('po_ref','=',False)]}"/>-->
+<!--                </xpath>-->
             </field>
         </record>
 
@@ -107,7 +107,7 @@
 
 
         <record id="pq_view_purchase_asn_form" model="ir.ui.view">
-            <field name="name">pq_view_purchase_asn_form</field>
+            <field name="name">pq.view.purchase.asn.form</field>
             <field name="model">purchase.asn</field>
             <field name="arch" type="xml">
                 <form string="Purchase Order" class="o_purchase_order">
@@ -150,21 +150,19 @@
                                         <field name="desc"/>
                                         <field name="quantity"/>
                                         <field name="state"/>
-                                        <!--                                        <field name="lot"/>-->
-                                        <!--                                        <button name="action_asn_show_details" type="object" icon="fa-list" width="0.1"-->
-                                        <!--                                                options="{&quot;warn&quot;: true}"/>-->
-                                        <button name="button_approve" help="Click for Done"
-                                                attrs="{'invisible': [('parent.state', 'in', ('draft','done'))]}"
-                                                string="Done"
-                                                type="object" icon="fa-check"/>
-                                        <button name="button_scrap" help="Click for Scrap"
-                                                attrs="{'invisible': [('parent.state', 'in', ('draft','done'))]}"
-                                                string="Scrap"
-                                                type="object" icon="fa-times"/>
-                                        <button name="button_return" help="Click for Return"
-                                                attrs="{'invisible': [('parent.state', 'in', ('draft','done'))]}"
-                                                string="Return"
-                                                type="object" icon="fa-reply"/>
+
+<!--                                        <button name="button_approve" help="Click for Done"-->
+<!--                                                attrs="{'invisible': [('parent.state', 'in', ('draft','done'))]}"-->
+<!--                                                string="Done"-->
+<!--                                                type="object" icon="fa-check"/>-->
+<!--                                        <button name="button_scrap" help="Click for Scrap"-->
+<!--                                                attrs="{'invisible': [('parent.state', 'in', ('draft','done'))]}"-->
+<!--                                                string="Scrap"-->
+<!--                                                type="object" icon="fa-times"/>-->
+<!--                                        <button name="button_return" help="Click for Return"-->
+<!--                                                attrs="{'invisible': [('parent.state', 'in', ('draft','done'))]}"-->
+<!--                                                string="Return"-->
+<!--                                                type="object" icon="fa-reply"/>-->
                                     </tree>
                                 </field>
                             </page>

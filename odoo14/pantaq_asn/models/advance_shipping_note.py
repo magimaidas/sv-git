@@ -17,7 +17,8 @@ class pantaq_asn(models.Model):
     quantity = fields.Integer(string='Quantity')
     purchase_id = fields.Many2one('purchase.asn', default=_default_get_po_id, index=True, required=True,
                                   ondelete='cascade')
-    state = fields.Selection([('draft','Draft'),('done', 'Done'), ('scrap', 'Scrap'), ('return', 'Return')], string='Status',
+    state = fields.Selection([('draft', 'Draft'), ('done', 'Done'), ('scrap', 'Scrap'), ('return', 'Return')],
+                             string='Status',
                              required=True, readonly=True, default='draft')
 
     def button_approve(self):
@@ -40,7 +41,6 @@ class pantaq_asn(models.Model):
     def button_return(self):
         if self:
             self.state = 'return'
-
 
     def action_asn_show_details(self):
         """ Returns an action that will open a form view (in a popup) allowing to work on all the
@@ -105,7 +105,78 @@ class pantaq_asn(models.Model):
     picking_id = fields.Many2one('stock.picking', 'Picking')
 
     def inspect_asn(self):
-        print("Inspecting ASN")
+        pick_ids = self.mapped('picking_id')
+        if not pick_ids.filtered(lambda p: p.state not in ('done','cancel')):
+            picking = self.env['stock.picking']
+            result = picking.create({
+                'origin': self.reference.name,
+                'picking_type_id': self.reference.picking_type_id.id,
+                'location_id': self.env.ref('stock.stock_location_suppliers').id,
+                'location_dest_id': self.reference.picking_type_id.warehouse_id.id,
+                'partner_id': self.reference.partner_id.id,
+                'company_id': self.env.user.company_id.id,
+                'move_type': 'direct',
+                'state': 'assigned'
+            })
+            self.picking_id = result.id
+            self.reference.sudo().update({
+                'picking_ids': result,
+                'picking_count': self.reference.picking_count + 1,
+            })
+
+            for item in self.reference.order_line:
+                product_ref = self.env['product.product'].search([('id', '=', item.product_id.id)])
+                move = self.env['stock.move'].create({
+                    'name': product_ref.name,
+                    'product_id': product_ref.id,
+                    'product_uom_qty': item.product_qty,
+                    'product_uom': product_ref.uom_id.id,
+                    'picking_id': result.id,
+                    'location_id': self.env.ref('stock.stock_location_suppliers').id,
+                    'location_dest_id': self.reference.picking_type_id.warehouse_id.id,
+                    'procure_method': 'make_to_order',
+                    'origin': self.reference.name,
+                    'state': 'draft',
+                })
+
+                sml = self.env['stock.move.line'].create({
+                    'move_id': move.id,
+                    # 'lot_id': self.lot_id.id,
+                    # 'qty_done': item.product_qty,
+                    'product_id': product_ref.id,
+                    'product_uom_id': product_ref.uom_id.id,
+                    'location_id': self.env.ref('stock.stock_location_suppliers').id,
+                    'location_dest_id': self.reference.picking_type_id.warehouse_id.id,
+                })
+                # move_res = move._action_confirm()
+                # move_assign =  move_res._action_assign()
+                # conf = result.sudo().action_confirm()
+                # assign = conf.sudo()._action_assign()
+            # self.reference.sudo().update({
+            #     'picking_ids': ((0, 0, result.id)),
+            # })
+        if self:
+            result = self.env["ir.actions.actions"]._for_xml_id('stock.action_picking_tree_all')
+                # override the context to get rid of the default filtering on operation type
+            result['context'] = {'default_partner_id': self.reference.partner_id.id,
+                                 'default_origin': self.reference.name,
+                                 'default_picking_type_id': self.reference.picking_type_id.id}
+            pick_ids = self.mapped('picking_id')
+                # choose the view_mode accordingly
+            if not pick_ids or len(pick_ids) > 1:
+                result['domain'] = "[('id','in',%s)]" % (pick_ids.ids)
+            elif len(pick_ids) == 1:
+                res = self.env.ref('stock.view_picking_form', False)
+                form_view = [(res and res.id or False, 'form')]
+                if 'views' in result:
+                    result['views'] = form_view + [(state, view) for state, view in result['views'] if
+                                                   view != 'form']
+                else:
+                    result['views'] = form_view
+                result['res_id'] = pick_ids.id
+                result['target'] = 'current'
+            return result
+        # else:
 
 
     @api.model
@@ -153,40 +224,10 @@ class pantaq_asn(models.Model):
                 line_item['location_dest_id'] = ref.picking_type_id.warehouse_id.id,
                 line_item['picking_type_id'] = ref.picking_type_id.id
                 move_lines.append((0, 0, line_item))
-
-            for x in move_lines:
-                print(x)
-
-            picking = self.env['stock.picking']
-            result = picking.create({
-                'origin': ref.name,
-                'picking_type_id': ref.picking_type_id.id,
-                'location_id': self.env.ref('stock.stock_location_suppliers').id,
-                'location_dest_id': ref.picking_type_id.warehouse_id.id,
-                'partner_id': ref.partner_id.id,
-                'company_id': self.env.user.company_id.id
-            })
-
-            for item in vals['order_line']:
-                product_ref = self.env['product.product'].search([('id', '=', item[2]['product_id'])])
-                move = self.env['stock.move'].create({
-                    'name': product_ref.name,
-                    'product_id': product_ref.id,
-                    'product_uom_qty': item[2]['quantity'],
-                    'product_uom':product_ref.uom_id.id,
-                    'picking_id': result.id,
-                    'location_id': self.env.ref('stock.stock_location_suppliers').id,
-                    'location_dest_id': ref.picking_type_id.warehouse_id.id,
-                    'procure_method': 'make_to_order',
-                    'origin': ref.name,
-                    'state': 'draft',
-                })
-            # conf = result.action_confirm()
-            # assign = conf._action_assign()
-            vals['picking_id'] = result.id
             return super(pantaq_asn, self).create(vals)
         else:
             return
+
 
     @api.onchange('reference')
     def _value_orderline(self):
@@ -205,8 +246,7 @@ class pantaq_asn(models.Model):
             lines.append((0, 0, vals))
         self.order_line = lines
 
+
 class pantaq_asn_inspection(models.Model):
     _name = 'purchase.asn.inspection'
     _description = 'ASN Inspection'
-
-

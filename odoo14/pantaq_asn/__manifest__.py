@@ -20,7 +20,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'pantaq','purchase','purchase_stock','delivery','stock'],
+    'depends': ['base', 'purchase','purchase_stock','delivery','stock','pantaq'],
 
     # always loaded
     'data': [
@@ -28,6 +28,7 @@
         'data/data.xml',
         'views/purchase_order.xml',
         'views/inventory_asn_menu.xml',
+        'views/stock_picking.xml',
 
     ],
     # only loaded in demonstration mode
