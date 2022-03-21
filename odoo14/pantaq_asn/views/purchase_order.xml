@@ -14,12 +14,24 @@
                 <xpath expr="//field[@name='currency_id']" position="after">
                     <field name="rfq_ref" string="RFQ Reference" attrs="{'invisible':[('rfq_ref','=',False)]}"/>
                 </xpath>
-<!--                <xpath expr="//field[@name='currency_id']" position="after">-->
-<!--                    <field name="po_ref" string="PO Reference" attrs="{'invisible':[('po_ref','=',False)]}"/>-->
-<!--                </xpath>-->
+                <xpath expr="//field[@name='currency_id']" position="after">
+                    <field name="po_ref" string="PO Reference" attrs="{'invisible':[('po_ref','=',False)]}"/>
+                </xpath>
             </field>
         </record>
 
+        <record id="purchase_view_pq_rfq_form_inherit1" model="ir.ui.view">
+            <field name="name">purchase_view_purchase_order_form_inherit1</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//header/button[@name='action_create_invoice']" position="replace">
+                    <button name="action_create_invoice" string="Create Bill" type="object" class="oe_highlight"
+                            context="{'create_bill':True}"
+                            attrs="{'invisible': ['|','|',('po_type','=','rfq'), ('state', 'not in', ('purchase', 'done')), ('invoice_status', 'in', ('no', 'invoiced'))]}"/>
+                </xpath>
+            </field>
+        </record>
         <record id="pantaq_view_pq_rfq_form_inherit" model="ir.ui.view">
             <field name="name">pq_view_purchase_order_form_inherit1</field>
             <field name="model">purchase.order</field>
@@ -40,12 +52,21 @@
                     </button>
                 </xpath>
                 <xpath expr="//field[@name='currency_id']" position="after">
-                    <field name="rfq_ref" string="RFQ Reference" attrs="{'invisible':[('rfq_ref','=',False)]}"/>
-                    <field name="po_ref" string="PO Reference" attrs="{'invisible':[('po_ref','=',False)]}"/>
+                    <field name="rfq_ref" string="RFQ Reference" attrs="{'invisible':[('po_type','=','rfq')]}"/>
+                    <field name="po_ref" string="PO Reference" attrs="{'invisible':[('po_type','=','purchase')]}"/>
                 </xpath>
-                <xpath expr="//field[@name='currency_id']" position="after">
-                    <field name="po_ref" string="PO Reference" attrs="{'invisible':[('po_ref','=',False)]}"/>
-                </xpath>
+
+                <!--                <xpath expr="//button[@name='action_view_invoice']" position="replace">-->
+                <!--                    <button type="object" name="action_create_invoice"-->
+                <!--                            class="oe_stat_button"-->
+                <!--                            icon="fa-pencil-square-o"-->
+                <!--                            attrs="{'invisible':['|', '|',('po_type','=','rfq'),('invoice_count', '=', 0), ('state', 'in', ('draft','sent','to approve'))]}">-->
+                <!--                        <field name="invoice_count" widget="statinfo" string="Vendor Bills"/>-->
+                <!--                        <field name='invoice_ids' invisible="1"/>-->
+                <!--                    </button>-->
+                <!--                <xpath expr="//field[@name='currency_id']" position="after">-->
+                <!--                    <field name="po_ref" string="PO Reference" attrs="{'invisible':[('po_type','=','rfq')]}"/>-->
+                <!--                </xpath>-->
             </field>
         </record>
 
@@ -112,8 +133,8 @@
             <field name="arch" type="xml">
                 <form string="Purchase Order" class="o_purchase_order">
                     <header>
-                        <button name="inspect_asn" string="Inspect" type="object" class="oe_highlight"/>
-                        <field name="state" widget="statusbar" statusbar_visible="draft,inspection,done"/>
+                        <button name="inspect_asn" string="Inspect" type="object" class="oe_highlight" attrs="{'invisible': [('state','in',('draft','done'))]}"/>
+                        <field name="state" widget="statusbar"/>
                     </header>
                     <sheet>
                         <field name="state" invisible="1"/>
@@ -125,6 +146,16 @@
                                 <field name="name" readonly="1"/>
                             </h1>
                         </div>
+                        <div class="oe_button_box" name="button_box">
+                            <button type="object"
+                                    name="action_view_picking"
+                                    class="oe_stat_button"
+                                    icon="fa-truck" attrs="{'invisible':[('picking_ids','=',[])]}">
+                                <field name="picking_count" widget="statinfo" string="Receipt"
+                                       help="Incoming Shipments"/>
+                                <field name="picking_ids" invisible="1"/>
+                            </button>
+                        </div>
                         <group>
                             <group>
                                 <field name="asn_date"/>
@@ -134,7 +165,7 @@
                                 <field name="arrival_date"/>
                                 <field name="location"/>
                                 <field name="reference" invisible="1"/>
-                                <field name="picking_id" invisible="1"/>
+                                <!--                                <field name="picking_id" invisible="1"/>-->
                             </group>
                         </group>
                         <notebook>
@@ -151,18 +182,18 @@
                                         <field name="quantity"/>
                                         <field name="state"/>
 
-<!--                                        <button name="button_approve" help="Click for Done"-->
-<!--                                                attrs="{'invisible': [('parent.state', 'in', ('draft','done'))]}"-->
-<!--                                                string="Done"-->
-<!--                                                type="object" icon="fa-check"/>-->
-<!--                                        <button name="button_scrap" help="Click for Scrap"-->
-<!--                                                attrs="{'invisible': [('parent.state', 'in', ('draft','done'))]}"-->
-<!--                                                string="Scrap"-->
-<!--                                                type="object" icon="fa-times"/>-->
-<!--                                        <button name="button_return" help="Click for Return"-->
-<!--                                                attrs="{'invisible': [('parent.state', 'in', ('draft','done'))]}"-->
-<!--                                                string="Return"-->
-<!--                                                type="object" icon="fa-reply"/>-->
+                                        <!--                                        <button name="button_approve" help="Click for Done"-->
+                                        <!--                                                attrs="{'invisible': [('parent.state', 'in', ('draft','done'))]}"-->
+                                        <!--                                                string="Done"-->
+                                        <!--                                                type="object" icon="fa-check"/>-->
+                                        <!--                                        <button name="button_scrap" help="Click for Scrap"-->
+                                        <!--                                                attrs="{'invisible': [('parent.state', 'in', ('draft','done'))]}"-->
+                                        <!--                                                string="Scrap"-->
+                                        <!--                                                type="object" icon="fa-times"/>-->
+                                        <!--                                        <button name="button_return" help="Click for Return"-->
+                                        <!--                                                attrs="{'invisible': [('parent.state', 'in', ('draft','done'))]}"-->
+                                        <!--                                                string="Return"-->
+                                        <!--                                                type="object" icon="fa-reply"/>-->
                                     </tree>
                                 </field>
                             </page>
@@ -194,6 +225,11 @@
             <field name="inherit_id" ref="purchase_stock.purchase_order_view_form_inherit"/>
             <field name="arch" type="xml">
                 <xpath expr="//header/button[@name='action_view_picking']" position="replace">
+                    <button name="action_view_picking" string="Receive Products" class="oe_highlight" type="object"
+                            attrs="{'invisible': ['|', '|' ,'|', ('is_shipped', '=', True),('asn_count','=',0), ('state','not in', ('purchase','done')), ('picking_count', '=', 0)]}"/>
+                </xpath>
+
+                <xpath expr="//header/button[@name='action_create_invoice']" position="replace">
                     <button name="action_view_picking" string="Receive Products" class="oe_highlight" type="object"
                             attrs="{'invisible': ['|', '|' ,'|', ('is_shipped', '=', True),('asn_count','=',0), ('state','not in', ('purchase','done')), ('picking_count', '=', 0)]}"/>
                 </xpath>

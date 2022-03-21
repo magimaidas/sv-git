@@ -100,13 +100,43 @@ class pantaq_asn(models.Model):
                                 invisible=True)
     order_line = fields.One2many('purchase.asn.line', 'purchase_id', string='Order Lines',
                                  states={'cancel': [('readonly', True)], 'done': [('readonly', True)]}, copy=True)
-    state = fields.Selection([('draft', 'New'), ('inspection', 'Under Inspection'), ('done', 'Done')], string='Status',
-                             required=True, readonly=True, default='draft')
-    picking_id = fields.Many2one('stock.picking', 'Picking')
+    state = fields.Selection([('draft', 'New'), ('inspection', 'Under Inspection'), ('done', 'Done')], string='Status', readonly=True, index=True, copy=False, default='draft', tracking=True)
+    picking_count = fields.Integer(compute='_compute_picking', string='Picking count', default=0, store=True)
+    picking_ids = fields.Many2many('stock.picking', compute='_compute_picking', string='Receptions', copy=False,
+                                   store=True)
+
+    def action_view_picking(self):
+        """ This function returns an action that display existing picking orders of given purchase order ids. When only one found, show the picking immediately.
+        """
+        result = self.env["ir.actions.actions"]._for_xml_id('stock.action_picking_tree_all')
+        # override the context to get rid of the default filtering on operation type
+        result['context'] = {'default_partner_id': self.reference.partner_id.id, 'default_origin': self.reference.name, 'default_picking_type_id': self.reference.picking_type_id.id}
+        pick_ids = self.mapped('picking_ids')
+        # choose the view_mode accordingly
+        if not pick_ids or len(pick_ids) > 1:
+            result['domain'] = "[('id','in',%s)]" % (pick_ids.ids)
+        elif len(pick_ids) == 1:
+            res = self.env.ref('stock.view_picking_form', False)
+            form_view = [(res and res.id or False, 'form')]
+            if 'views' in result:
+                result['views'] = form_view + [(state,view) for state,view in result['views'] if view != 'form']
+            else:
+                result['views'] = form_view
+            result['res_id'] = pick_ids.id
+        return result
+
+
+    @api.depends('picking_ids')
+    def _compute_picking(self):
+        for order in self.reference:
+            pickings = order.order_line.mapped('move_ids.picking_id')
+            order.picking_ids = pickings
+            order.picking_count = len(pickings)
 
     def inspect_asn(self):
-        pick_ids = self.mapped('picking_id')
-        if not pick_ids.filtered(lambda p: p.state not in ('done','cancel')):
+        pick_ids = self.reference.mapped('picking_ids')
+        active_picks = pick_ids.filtered(lambda p: p.state not in ('cancel')).filtered(lambda p: p.picking_type_code not in ('outgoing'))
+        if not active_picks:
             picking = self.env['stock.picking']
             result = picking.create({
                 'origin': self.reference.name,
@@ -118,9 +148,9 @@ class pantaq_asn(models.Model):
                 'move_type': 'direct',
                 'state': 'assigned'
             })
-            self.picking_id = result.id
+            # self.picking_ids = (0,0,result)
             self.reference.sudo().update({
-                'picking_ids': result,
+                'picking_ids': (4,result.id),
                 'picking_count': self.reference.picking_count + 1,
             })
 
@@ -161,7 +191,7 @@ class pantaq_asn(models.Model):
             result['context'] = {'default_partner_id': self.reference.partner_id.id,
                                  'default_origin': self.reference.name,
                                  'default_picking_type_id': self.reference.picking_type_id.id}
-            pick_ids = self.mapped('picking_id')
+            pick_ids = self.reference.mapped('picking_ids')
                 # choose the view_mode accordingly
             if not pick_ids or len(pick_ids) > 1:
                 result['domain'] = "[('id','in',%s)]" % (pick_ids.ids)
