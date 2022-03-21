@@ -89,9 +89,10 @@
                             context="{'send_rfq':True}" class="oe_highlight"/>
                     <button name="print_quotation" string="Print RFQ" type="object" states="draft" class="oe_highlight"
                             groups="base.group_user"/>
+                    <field name="po_type" invisible="1"/>
                     <button name="action_view_invoice" string="Create Bill" type="object" class="oe_highlight"
                             context="{'create_bill':True}"
-                            attrs="{'invisible': ['|', ('state', 'not in', ('purchase', 'done')), ('invoice_status', 'in', ('no', 'invoiced'))]}"/>
+                            attrs="{'invisible': ['|', '|',('po_type','=','rfq'),('state', 'not in', ('purchase', 'done')), ('invoice_status', 'in', ('no', 'invoiced'))]}"/>
                     <button name="action_rfq_send" states="sent" string="Re-Send RFQ by Email" type="object"
                             context="{'send_rfq':True}"/>
                     <button name="print_quotation" string="Re-Print RFQ" type="object" states="sent"
@@ -102,7 +103,7 @@
                     <button name="action_rfq_send" states="purchase" string="Send PO by Email" type="object"
                             context="{'send_rfq':False}"/>
                     <button name="action_view_invoice" string="Create Bill" type="object" context="{'create_bill':True}"
-                            attrs="{'invisible': ['|', '|', ('state', 'not in', ('purchase', 'done')), ('invoice_status', 'not in', ('no', 'invoiced')), ('order_line', '=', [])]}"/>
+                            attrs="{'invisible': ['|', '|',('po_type','=','rfq'), ('state', 'not in', ('purchase', 'done')), ('invoice_status', 'not in', ('no', 'invoiced')), ('order_line', '=', [])]}"/>
                     <button name="button_draft" states="cancel" string="Set to Draft" type="object"/>
                     <button name="button_cancel" states="draft" string="Cancel" type="object"/>
                     <button name="button_rfq_done" string="Response Received" type="object" class="oe_highlight"
@@ -219,10 +220,10 @@
                                     <field name="rfq_status" readonly="1"/>
                                     <field name="target_currency_id" invisible="1"/>
                                     <button name="button_toggle_approve"
-                                            attrs="{'invisible': [('rfq_status', '=', 'approved')]}" string="Approve"
+                                            attrs="{'invisible': ['|',('rfq_status', '=', 'approved'),('state','in',('purchase','cancel'))]}" string="Approve"
                                             type="object" icon="fa-check"/>
                                     <button name="button_toggle_reject"
-                                            attrs="{'invisible': [('rfq_status', '=', 'rejected')]}" string="Reject"
+                                            attrs="{'invisible': ['|',('rfq_status', '=', 'rejected'),('state','in',('purchase','cancel'))]}" string="Reject"
                                             type="object" icon="fa-times"/>
                                 </tree>
                                 <form string="Order Line">
@@ -460,7 +461,7 @@
                             class="oe_highlight" groups="purchase.group_purchase_manager"/>
                     <button name="action_view_invoice" string="Create Bill" type="object" class="oe_highlight"
                             context="{'create_bill':True}"
-                            attrs="{'invisible': ['|', ('state', 'not in', ('purchase', 'done')), ('invoice_status', 'in', ('no', 'invoiced'))]}"/>
+                            attrs="{'invisible': ['|', ('po_type','=','rfq'),('state', 'not in', ('purchase', 'done')), ('invoice_status', 'in', ('no', 'invoiced'))]}"/>
                     <button name="action_rfq_send" states="sent" string="Re-Send by Email" type="object"
                             context="{'send_rfq':False}"/>
                     <button name="print_quotation" string="Print PO" type="object" states="sent"

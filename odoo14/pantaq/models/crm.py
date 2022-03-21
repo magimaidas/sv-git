@@ -202,7 +202,7 @@ class Lead(models.Model):
         else:
             raise Warning(_("RFQ not found. Kindly convert the Enquiry to RFQ !!"))         
 
-        # return internal_quote_id
+        return internal_quote_id
                         
 
 
