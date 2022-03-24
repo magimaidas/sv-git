@@ -20,6 +20,31 @@ class pantaq_asn(models.Model):
     state = fields.Selection([('draft', 'Draft'), ('done', 'Done'), ('scrap', 'Scrap'), ('return', 'Return')],
                              string='Status',
                              required=True, readonly=True, default='draft')
+    returned_qty = fields.Integer(string='Returned', default=0,readonly=True,compute='_compute_qty',copy=False,
+                                   store=True)
+    scrapped_qty = fields.Integer(string='Scrapped', default=0,readonly=True,compute='_compute_qty',copy=False,
+                                   store=True)
+    done_qty = fields.Integer(string='Done', default=0,readonly=True,compute='_compute_qty',copy=False,
+                                   store=True)
+
+    def _compute_qty(self):
+        for self in self:
+            picks = self.purchase_id.reference.mapped('picking_ids')
+            if picks:
+                for pick in picks:
+                    if pick.is_return_picking:
+                        for product_id in pick.product_id:
+                            if self.product_id.id == product_id.id:
+                                self.returned_qty = pick.move_line_ids.qty_done
+                    if pick.has_scrap_move:
+                        for product_id in pick.product_id:
+                            if self.product_id.id == product_id.id:
+                                for line in pick.move_line_ids:
+                                    self.scrapped_qty = line.qty_done
+            print("Hi ",self)
+            self.returned_qty = 0
+            self.scrapped_qty = 0
+            self.done_qty = 0
 
     def button_approve(self):
         if self:
@@ -148,11 +173,14 @@ class pantaq_asn(models.Model):
                 'move_type': 'direct',
                 'state': 'assigned'
             })
-            # self.picking_ids = (0,0,result)
+            # self.sudo().update({
+            #     'picking_ids' : (0,0,result.id)
+            # })
             self.reference.sudo().update({
                 'picking_ids': (4,result.id),
                 'picking_count': self.reference.picking_count + 1,
             })
+            self.reference._compute_picking()
 
             for item in self.reference.order_line:
                 product_ref = self.env['product.product'].search([('id', '=', item.product_id.id)])
@@ -185,6 +213,8 @@ class pantaq_asn(models.Model):
             # self.reference.sudo().update({
             #     'picking_ids': ((0, 0, result.id)),
             # })
+            self.reference._compute_picking()
+
         if self:
             result = self.env["ir.actions.actions"]._for_xml_id('stock.action_picking_tree_all')
                 # override the context to get rid of the default filtering on operation type

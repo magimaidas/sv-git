@@ -111,6 +111,11 @@
                             <!--                                   domain="[('product_id','=',product_id)]"-->
                             <!--                            />-->
                         </group>
+                        <group>
+                            <field name="returned_qty" />
+                            <field name="scrapped_qty" />
+                            <field name="done_qty" />
+                        </group>
                     </group>
                 </form>
             </field>
@@ -133,7 +138,8 @@
             <field name="arch" type="xml">
                 <form string="Purchase Order" class="o_purchase_order">
                     <header>
-                        <button name="inspect_asn" string="Inspect" type="object" class="oe_highlight" attrs="{'invisible': [('state','in',('draft','done'))]}"/>
+                        <button name="inspect_asn" string="Inspect" type="object" class="oe_highlight"
+                                attrs="{'invisible': [('state','in',('draft','done'))]}"/>
                         <field name="state" widget="statusbar"/>
                     </header>
                     <sheet>
@@ -181,7 +187,12 @@
                                         <field name="desc"/>
                                         <field name="quantity"/>
                                         <field name="state"/>
-
+                                        <field name="returned_qty"
+                                               attrs="{'invisible': ['|',('returned_qty','=',0),('state','in',('draft'))]}"/>
+                                        <field name="scrapped_qty"
+                                               attrs="{'invisible': ['|',('scrapped_qty','=',0),('state','in',('draft'))]}"/>
+                                        <field name="done_qty"
+                                               attrs="{'invisible': ['|',('done_qty','=',0),('state','in',('draft'))]}"/>
                                         <!--                                        <button name="button_approve" help="Click for Done"-->
                                         <!--                                                attrs="{'invisible': [('parent.state', 'in', ('draft','done'))]}"-->
                                         <!--                                                string="Done"-->
