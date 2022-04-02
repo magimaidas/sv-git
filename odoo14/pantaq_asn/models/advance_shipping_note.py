@@ -68,21 +68,8 @@ class pantaq_asn(models.Model):
             self.state = 'return'
 
     def action_asn_show_details(self):
-        """ Returns an action that will open a form view (in a popup) allowing to work on all the
-        move lines of a particular move. This form view is used when "show operations" is not
-        checked on the picking type.
-        """
+
         self.ensure_one()
-
-        # picking_type_id = self.picking_type_id or self.picking_id.picking_type_id
-
-        # If "show suggestions" is not checked on the picking type, we have to filter out the
-        # reserved move lines. We do this by displaying `move_line_nosuggest_ids`. We use
-        # different views to display one field or another so that the webclient doesn't have to
-        # fetch both.
-        # if picking_type_id.show_reserved:
-        #     view = self.env.ref('stock.view_stock_move_operations')
-        # else:
         view = self.env.ref('stock.view_stock_move_operations')
         sm_obj = self.env['stock.move']
         return {
@@ -131,8 +118,6 @@ class pantaq_asn(models.Model):
                                    store=True)
 
     def action_view_picking(self):
-        """ This function returns an action that display existing picking orders of given purchase order ids. When only one found, show the picking immediately.
-        """
         result = self.env["ir.actions.actions"]._for_xml_id('stock.action_picking_tree_all')
         # override the context to get rid of the default filtering on operation type
         result['context'] = {'default_partner_id': self.reference.partner_id.id, 'default_origin': self.reference.name, 'default_picking_type_id': self.reference.picking_type_id.id}
@@ -206,18 +191,12 @@ class pantaq_asn(models.Model):
                     'location_id': self.env.ref('stock.stock_location_suppliers').id,
                     'location_dest_id': self.reference.picking_type_id.warehouse_id.id,
                 })
-                # move_res = move._action_confirm()
-                # move_assign =  move_res._action_assign()
-                # conf = result.sudo().action_confirm()
-                # assign = conf.sudo()._action_assign()
-            # self.reference.sudo().update({
-            #     'picking_ids': ((0, 0, result.id)),
-            # })
+
             self.reference._compute_picking()
 
         if self:
             result = self.env["ir.actions.actions"]._for_xml_id('stock.action_picking_tree_all')
-                # override the context to get rid of the default filtering on operation type
+           # override the context to get rid of the default filtering on operation type
             result['context'] = {'default_partner_id': self.reference.partner_id.id,
                                  'default_origin': self.reference.name,
                                  'default_picking_type_id': self.reference.picking_type_id.id}
@@ -236,7 +215,6 @@ class pantaq_asn(models.Model):
                 result['res_id'] = pick_ids.id
                 result['target'] = 'current'
             return result
-        # else:
 
 
     @api.model

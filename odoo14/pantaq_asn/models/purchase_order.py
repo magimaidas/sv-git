@@ -1,9 +1,5 @@
 from odoo import api, fields, models, _
-from odoo.osv import expression
-from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
-from odoo.tools.float_utils import float_is_zero
 from odoo.exceptions import AccessError, UserError, ValidationError
-from odoo.tools.misc import formatLang, get_lang
 from odoo.tools import float_compare, float_round, float_is_zero, OrderedSet
 
 
@@ -92,12 +88,6 @@ class PurchaseOrder(models.Model):
             result['domain'] = "[('id','in',%s)]" % (asn_obj.ids)
         return result
 
-    # def button_confirm(self):
-    #     for order in self:
-    #         order.update({
-    #             'state': 'purchase'
-    #         })
-
     def button_approve(self, force=False):
         self = self.filtered(lambda order: order._approval_allowed())
         self.write({'state': 'purchase', 'date_approve': fields.Datetime.now()})
@@ -119,9 +109,3 @@ class PurchaseOrderLine(models.Model):
 
     asn_qty = fields.Integer(string="ASN Qty", default=0, invisible=True)
 
-    # def _prepare_stock_moves(self, picking):
-    #     res = super(PurchaseOrderLine, self)._prepare_stock_moves(picking)
-    #     if self.order_id.asn_ids:
-    #         res.update(('product_id', self.order_id.asn_ids) for k, v in d.items() if v == "value2")
-    #
-    #     print(res)
