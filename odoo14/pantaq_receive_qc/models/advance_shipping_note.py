@@ -144,77 +144,78 @@ class pantaq_asn(models.Model):
             order.picking_count = len(pickings)
 
     def inspect_asn(self):
-        pick_ids = self.reference.mapped('picking_ids')
-        active_picks = pick_ids.filtered(lambda p: p.state not in ('cancel')).filtered(lambda p: p.picking_type_code not in ('outgoing'))
-        if not active_picks:
-            picking = self.env['stock.picking']
-            result = picking.create({
-                'origin': self.reference.name,
-                'picking_type_id': self.reference.picking_type_id.id,
-                'location_id': self.env.ref('stock.stock_location_suppliers').id,
-                'location_dest_id': self.reference.picking_type_id.warehouse_id.id,
-                'partner_id': self.reference.partner_id.id,
-                'company_id': self.env.user.company_id.id,
-                'move_type': 'direct',
-                'state': 'assigned'
-            })
-            # self.sudo().update({
-            #     'picking_ids' : (0,0,result.id)
-            # })
-            self.reference.sudo().update({
-                'picking_ids': [(4,result.id)],
-                'picking_count': self.reference.picking_count + 1,
-            })
-            self.reference._compute_picking()
-
-            for item in self.reference.order_line:
-                product_ref = self.env['product.product'].search([('id', '=', item.product_id.id)])
-                move = self.env['stock.move'].create({
-                    'name': product_ref.name,
-                    'product_id': product_ref.id,
-                    'product_uom_qty': item.product_qty,
-                    'product_uom': product_ref.uom_id.id,
-                    'picking_id': result.id,
-                    'location_id': self.env.ref('stock.stock_location_suppliers').id,
-                    'location_dest_id': self.reference.picking_type_id.warehouse_id.id,
-                    'procure_method': 'make_to_order',
-                    'origin': self.reference.name,
-                    'state': 'draft',
-                })
-
-                sml = self.env['stock.move.line'].create({
-                    'move_id': move.id,
-                    # 'lot_id': self.lot_id.id,
-                    # 'qty_done': item.product_qty,
-                    'product_id': product_ref.id,
-                    'product_uom_id': product_ref.uom_id.id,
-                    'location_id': self.env.ref('stock.stock_location_suppliers').id,
-                    'location_dest_id': self.reference.picking_type_id.warehouse_id.id,
-                })
-
-            self.reference._compute_picking()
-
-        if self:
-            result = self.env["ir.actions.actions"]._for_xml_id('stock.action_picking_tree_all')
-           # override the context to get rid of the default filtering on operation type
-            result['context'] = {'default_partner_id': self.reference.partner_id.id,
-                                 'default_origin': self.reference.name,
-                                 'default_picking_type_id': self.reference.picking_type_id.id}
-            pick_ids = self.reference.mapped('picking_ids')
-                # choose the view_mode accordingly
-            if not pick_ids or len(pick_ids) > 1:
-                result['domain'] = "[('id','in',%s)]" % (pick_ids.ids)
-            elif len(pick_ids) == 1:
-                res = self.env.ref('stock.view_picking_form', False)
-                form_view = [(res and res.id or False, 'form')]
-                if 'views' in result:
-                    result['views'] = form_view + [(state, view) for state, view in result['views'] if
-                                                   view != 'form']
-                else:
-                    result['views'] = form_view
-                result['res_id'] = pick_ids.id
-                result['target'] = 'current'
-            return
+        self.reference.button_confirm()
+        # pick_ids = self.reference.mapped('picking_ids')
+        # active_picks = pick_ids.filtered(lambda p: p.state not in ('cancel')).filtered(lambda p: p.picking_type_code not in ('outgoing'))
+        # if not active_picks:
+        #     picking = self.env['stock.picking']
+        #     result = picking.create({
+        #         'origin': self.reference.name,
+        #         'picking_type_id': self.reference.picking_type_id.id,
+        #         'location_id': self.env.ref('stock.stock_location_suppliers').id,
+        #         'location_dest_id': self.reference.picking_type_id.warehouse_id.id,
+        #         'partner_id': self.reference.partner_id.id,
+        #         'company_id': self.env.user.company_id.id,
+        #         'move_type': 'direct',
+        #         'state': 'assigned'
+        #     })
+        #     # self.sudo().update({
+        #     #     'picking_ids' : (0,0,result.id)
+        #     # })
+        #     self.reference.sudo().update({
+        #         'picking_ids': [(4,result.id)],
+        #         'picking_count': self.reference.picking_count + 1,
+        #     })
+        #     self.reference._compute_picking()
+        #
+        #     for item in self.reference.order_line:
+        #         product_ref = self.env['product.product'].search([('id', '=', item.product_id.id)])
+        #         move = self.env['stock.move'].create({
+        #             'name': product_ref.name,
+        #             'product_id': product_ref.id,
+        #             'product_uom_qty': item.product_qty,
+        #             'product_uom': product_ref.uom_id.id,
+        #             'picking_id': result.id,
+        #             'location_id': self.env.ref('stock.stock_location_suppliers').id,
+        #             'location_dest_id': self.reference.picking_type_id.warehouse_id.id,
+        #             'procure_method': 'make_to_order',
+        #             'origin': self.reference.name,
+        #             'state': 'draft',
+        #         })
+        #
+        #         sml = self.env['stock.move.line'].create({
+        #             'move_id': move.id,
+        #             # 'lot_id': self.lot_id.id,
+        #             # 'qty_done': item.product_qty,
+        #             'product_id': product_ref.id,
+        #             'product_uom_id': product_ref.uom_id.id,
+        #             'location_id': self.env.ref('stock.stock_location_suppliers').id,
+        #             'location_dest_id': self.reference.picking_type_id.warehouse_id.id,
+        #         })
+        #
+        #     self.reference._compute_picking()
+        #
+        # if self:
+        #     result = self.env["ir.actions.actions"]._for_xml_id('stock.action_picking_tree_all')
+        #    # override the context to get rid of the default filtering on operation type
+        #     result['context'] = {'default_partner_id': self.reference.partner_id.id,
+        #                          'default_origin': self.reference.name,
+        #                          'default_picking_type_id': self.reference.picking_type_id.id}
+        #     pick_ids = self.reference.mapped('picking_ids')
+        #         # choose the view_mode accordingly
+        #     if not pick_ids or len(pick_ids) > 1:
+        #         result['domain'] = "[('id','in',%s)]" % (pick_ids.ids)
+        #     elif len(pick_ids) == 1:
+        #         res = self.env.ref('stock.view_picking_form', False)
+        #         form_view = [(res and res.id or False, 'form')]
+        #         if 'views' in result:
+        #             result['views'] = form_view + [(state, view) for state, view in result['views'] if
+        #                                            view != 'form']
+        #         else:
+        #             result['views'] = form_view
+        #         result['res_id'] = pick_ids.id
+        #         result['target'] = 'current'
+        #     return
 
     @api.model
     def create(self, vals):

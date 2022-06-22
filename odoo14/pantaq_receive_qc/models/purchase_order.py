@@ -60,7 +60,7 @@ class PurchaseOrder(models.Model):
             'name': _('Create ASN'),
             'view_type': 'form',
             'view_mode': 'form',
-            'view_id': self.env.ref('pantaq_asn.pq_view_purchase_asn_form').id,
+            'view_id': self.env.ref('pantaq_receive_qc.pq_view_purchase_asn_form').id,
             'res_model': 'purchase.asn',
             'context': {'default_reference': self.id},
             'type': 'ir.actions.act_window',
@@ -76,10 +76,10 @@ class PurchaseOrder(models.Model):
         """ This function returns an action that display existing ASNs of given purchase order.
         """
 
-        result = self.env["ir.actions.actions"]._for_xml_id('pantaq_asn.action_asn_tree')
+        result = self.env["ir.actions.actions"]._for_xml_id('pantaq_receive_qc.action_asn_tree')
         asn_obj = self.env['purchase.asn'].search([('reference', '=', self.name)])
         if len(asn_obj) == 1:
-            res = self.env.ref('pantaq_asn.pq_view_purchase_asn_form', False)
+            res = self.env.ref('pantaq_receive_qc.pq_view_purchase_asn_form', False)
             form_view = [(res and res.id or False, 'form')]
             result['views'] = form_view
             result['view_id'] = res.id

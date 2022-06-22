@@ -1,60 +1,24 @@
 <odoo>
-  <data>
-    <!-- explicit list view definition -->
-<!--
-    <record model="ir.ui.view" id="pantaq_receive_qc.list">
-      <field name="name">pantaq_receive_qc list</field>
-      <field name="model">pantaq_receive_qc.pantaq_receive_qc</field>
-      <field name="arch" type="xml">
-        <tree>
-          <field name="name"/>
-          <field name="value"/>
-          <field name="value2"/>
-        </tree>
-      </field>
-    </record>
--->
+    <data>
+        <record id="action_picking_qc" model="ir.actions.act_window">
+            <field name="name">Quality Checks</field>
+            <field name="res_model">stock.picking</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('name','ilike', 'QC')]</field>
+            <field name="context">{'contact_display': 'partner_address', 'default_company_id': allowed_company_ids[0]}</field>
+            <field name="search_view_id" ref="stock.view_picking_internal_search"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No transfer found. Let's create one!
+                </p><p>
+                    Transfers allow you to move products from one location to another.
+                </p>
+            </field>
+        </record>
 
-    <!-- actions opening views on models -->
-<!--
-    <record model="ir.actions.act_window" id="pantaq_receive_qc.action_window">
-      <field name="name">pantaq_receive_qc window</field>
-      <field name="res_model">pantaq_receive_qc.pantaq_receive_qc</field>
-      <field name="view_mode">tree,form</field>
-    </record>
--->
+        <menuitem id="all_picking_qc" name="Quality Check" parent="stock.menu_stock_warehouse_mgmt" sequence="6"
+                  action="action_picking_qc" groups="stock.group_stock_manager,stock.group_stock_user"/>
 
-    <!-- server action to the one above -->
-<!--
-    <record model="ir.actions.server" id="pantaq_receive_qc.action_server">
-      <field name="name">pantaq_receive_qc server</field>
-      <field name="model_id" ref="model_pantaq_receive_qc_pantaq_receive_qc"/>
-      <field name="state">code</field>
-      <field name="code">
-        action = {
-          "type": "ir.actions.act_window",
-          "view_mode": "tree,form",
-          "res_model": model._name,
-        }
-      </field>
-    </record>
--->
-
-    <!-- Top menu item -->
-<!--
-    <menuitem name="pantaq_receive_qc" id="pantaq_receive_qc.menu_root"/>
--->
-    <!-- menu categories -->
-<!--
-    <menuitem name="Menu 1" id="pantaq_receive_qc.menu_1" parent="pantaq_receive_qc.menu_root"/>
-    <menuitem name="Menu 2" id="pantaq_receive_qc.menu_2" parent="pantaq_receive_qc.menu_root"/>
--->
-    <!-- actions -->
-<!--
-    <menuitem name="List" id="pantaq_receive_qc.menu_1_list" parent="pantaq_receive_qc.menu_1"
-              action="pantaq_receive_qc.action_window"/>
-    <menuitem name="Server to list" id="pantaq_receive_qc" parent="pantaq_receive_qc.menu_2"
-              action="pantaq_receive_qc.action_server"/>
--->
-  </data>
+    </data>
 </odoo>
