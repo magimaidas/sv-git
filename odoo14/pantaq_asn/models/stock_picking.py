@@ -1,6 +1,10 @@
 from odoo import api, fields, models, SUPERUSER_ID, _
 from odoo.exceptions import AccessError, UserError, ValidationError
+import logging
+from collections import namedtuple
 
+from odoo import _, _lt, api, fields, models
+from odoo.exceptions import UserError
 
 
 class StockMove(models.Model):
@@ -37,10 +41,17 @@ class StockMove(models.Model):
         else:
             raise ValidationError("Can't return scrapped items (or) Check if done quantity > 0")
 
+
+
 class Picking(models.Model):
     _inherit = "stock.picking"
 
-    # set domain for teacher to filter the selected teachers according to the class value
+    # @api.model
+    # def create(self,vals):
+    #     new_val = super(Picking, self).create(vals)
+
+
+
     @api.onchange('product_id')
     def set_domain_for_lot(self):
         move_lines = self.mapped('move_line_ids')
@@ -114,3 +125,41 @@ class StockReturnPickingLine(models.TransientModel):
     @api.depends('lot_id')
     def set_context(self):
         print("Hi")
+
+
+class Warehouse(models.Model):
+    _inherit = "stock.warehouse"
+
+    def _get_sequence_values(self):
+        """ Each picking type is created with a sequence. This method returns
+        the sequence values associated to each picking type.
+        """
+        return {
+            'in_type_id': {
+                'name': self.name + ' ' + ('Sequence in'),
+                'prefix': self.code + '/IN/', 'padding': 5,
+                'company_id': self.company_id.id,
+            },
+            'out_type_id': {
+                'name': self.name + ' ' + ('Sequence out'),
+                'prefix': self.code + '/OUT/', 'padding': 5,
+                'company_id': self.company_id.id,
+            },
+            'pack_type_id': {
+                'name': self.name + ' ' + ('Sequence packing'),
+                'prefix': self.code + '/PACK/', 'padding': 5,
+                'company_id': self.company_id.id,
+            },
+            'pick_type_id': {
+                'name': self.name + ' ' + ('Sequence picking'),
+                'prefix': self.code + '/PICK/', 'padding': 5,
+                'company_id': self.company_id.id,
+            },
+            'int_type_id': {
+                'name': self.name + ' ' + ('Sequence internal'),
+                'prefix': self.code + '/QC/', 'padding': 5,
+                'company_id': self.company_id.id,
+            },
+        }
+
+

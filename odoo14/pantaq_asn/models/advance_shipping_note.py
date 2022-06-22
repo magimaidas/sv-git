@@ -162,7 +162,7 @@ class pantaq_asn(models.Model):
             #     'picking_ids' : (0,0,result.id)
             # })
             self.reference.sudo().update({
-                'picking_ids': (4,result.id),
+                'picking_ids': [(4,result.id)],
                 'picking_count': self.reference.picking_count + 1,
             })
             self.reference._compute_picking()
@@ -214,8 +214,7 @@ class pantaq_asn(models.Model):
                     result['views'] = form_view
                 result['res_id'] = pick_ids.id
                 result['target'] = 'current'
-            return result
-
+            return
 
     @api.model
     def create(self, vals):

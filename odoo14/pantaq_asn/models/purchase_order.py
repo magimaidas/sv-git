@@ -94,11 +94,11 @@ class PurchaseOrder(models.Model):
         self.filtered(lambda p: p.company_id.po_lock == 'lock').write({'state': 'done'})
         return {}
 
-    def action_view_picking(self):
-        if self.asn_count == 0:
-            raise ValidationError("No ASN found to receive product. First create ASN then proceed!")
-        else:
-            return super(PurchaseOrder, self).action_view_picking()
+    # def action_view_picking(self):
+    #     if self.asn_count == 0:
+    #         raise ValidationError("No ASN found to receive product. First create ASN then proceed!")
+    #     else:
+    #         return super(PurchaseOrder, self).action_view_picking()
 
     def inspect_asn(self):
         print("Inspecting")
