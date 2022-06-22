@@ -381,6 +381,7 @@
                                        domain="[('company_id', '=', False)]"/>
                                 <field name="hide_from_executives" groups="sales_team.group_sale_manager"/>
                                 <field name="company_id" groups="base.group_multi_company"/>
+                                <field name="companies"/>
 
                             </group>
                             <group name="opportunity_partner" attrs="{'invisible': [('type', '=', 'opportunity')]}">

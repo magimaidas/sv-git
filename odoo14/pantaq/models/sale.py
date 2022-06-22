@@ -110,8 +110,6 @@ class SaleOrder(models.Model):
     amount_tax = fields.Monetary(string='Taxes', store=True, readonly=True, compute='_amount_all', track_visibility='always', multi='xyz')
     amount_total = fields.Monetary(string='Total', store=True, readonly=True, compute='_amount_all', track_visibility='always', multi='xyz')
 
-
-
     # New:
     lead_id    = fields.Many2one('crm.lead', string='Enquiry', ondelete='restrict')
     sale_type  = fields.Selection(selection=[('quote', 'Customer Quotation'), ('order', 'Sale Order')], string='Order Type',

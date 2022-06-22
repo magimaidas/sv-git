@@ -580,7 +580,7 @@ class EnquiryLines(models.Model):
 
 
     lead_id = fields.Many2one('crm.lead', string='Enquiry', required=True, ondelete='cascade', index=True, copy=False)
-    name    = fields.Text(string='Description', required=True)
+    name = fields.Text(string='Description', required=True)
 
     product_id = fields.Many2one('product.product', string='Product', domain=[('sale_ok', '=', True)], change_default=True, ondelete='restrict')
     product_uom_qty = fields.Float(string='Quantity', digits=dp.get_precision('Product Unit of Measure'), required=True, default=1.0)

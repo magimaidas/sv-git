@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="pq_stock_return_picking_line" model="ir.actions.act_window">
+        <field name="name">Reverse Transfer Line</field>
+        <field name="res_model">stock.return.picking.line</field>
+        <field name="view_mode">tree</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="pq_stock_return_picking_line_tree" model="ir.ui.view">
+        <field name="name">Return lines</field>
+        <field name="model">stock.return.picking.line</field>
+        <field name="arch" type="xml">
+            <tree string="Return picking line">
+
+            </tree>
+        </field>
+    </record>
+</odoo>

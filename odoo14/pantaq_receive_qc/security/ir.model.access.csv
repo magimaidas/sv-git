@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_pantaq_receive_qc_pantaq_receive_qc,pantaq_receive_qc.pantaq_receive_qc,model_pantaq_receive_qc_pantaq_receive_qc,base.group_user,1,1,1,1

@@ -103,7 +103,7 @@
                     <button name="action_rfq_send" states="purchase" string="Send PO by Email" type="object"
                             context="{'send_rfq':False}"/>
                     <button name="action_view_invoice" string="Create Bill" type="object" context="{'create_bill':True}"
-                            attrs="{'invisible': ['|', '|',('po_type','=','rfq'), ('state', 'not in', ('purchase', 'done')), ('invoice_status', 'not in', ('no', 'invoiced')), ('order_line', '=', [])]}"/>
+                            attrs="{'invisible': ['|', '|','|',('po_type','=','rfq'), ('state', 'not in', ('purchase', 'done')), ('invoice_status', 'not in', ('no', 'invoiced')), ('order_line', '=', [])]}"/>
                     <button name="button_draft" states="cancel" string="Set to Draft" type="object"/>
                     <button name="button_cancel" states="draft" string="Cancel" type="object"/>
                     <button name="button_rfq_done" string="Response Received" type="object" class="oe_highlight"
