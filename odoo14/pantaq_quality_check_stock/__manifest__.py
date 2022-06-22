@@ -4,14 +4,13 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 {
-    "name": "Quality control - Stock (OCA)",
+    "name": "Pantaq Stock Quality",
     "version": "14.0.1.0.0",
     "category": "Quality control",
     "license": "AGPL-3",
-    "author": "OdooMRP team, AvanzOSC, Serv. Tecnol. Avanzados - Pedro M. Baeza, "
-    "Agile Business Group, Odoo Community Association (OCA)",
-    "website": "https://github.com/OCA/manufacture",
-    "depends": ["quality_control_oca", "stock"],
+    "author": "",
+    "website": "",
+    "depends": ["pantaq_quality_control", "stock"],
     "data": [
         "views/qc_inspection_view.xml",
         "views/stock_picking_view.xml",

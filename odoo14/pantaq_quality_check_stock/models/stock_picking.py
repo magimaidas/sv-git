@@ -5,7 +5,7 @@
 
 from odoo import api, fields, models
 
-from odoo.addons.quality_control_oca.models.qc_trigger_line import _filter_trigger_lines
+from odoo.addons.pantaq_quality_control.models.qc_trigger_line import _filter_trigger_lines
 
 
 class StockPicking(models.Model):
