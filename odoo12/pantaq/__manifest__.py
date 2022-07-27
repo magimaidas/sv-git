@@ -2,8 +2,8 @@
 {
     'name': "Pantaq",
     'summary': "Module created for Pantaq to handle Procurement process",
-    'sequence': 55,
     'author': 'Systems Valley Ltd.,',
+    'license' : 'AGPL-3',
     'description': """
 Pantaq
 ====================

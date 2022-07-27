@@ -34,6 +34,11 @@ class Lead(models.Model):
 
         return super(Lead, self).fields_view_get(view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu)
 
+    @api.model
+    def _default_name(self):
+        if self.name:
+            return self.name
+
     @api.one
     @api.depends('purchase_ids')
     def _get_count_records(self):
