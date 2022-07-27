@@ -16,7 +16,7 @@ who help companies achieve substantial cost savings on any area of spend.
     'category': 'Logistics and Supply Chain',
     'version': '1.1',
     'depends': ['base', 'crm', 'sale_crm', 'uom', 'purchase', 'hr', 'delivery_hs_code', 'stock', 'web'],
-
+    'images': ['static/description/icon.png'],
     'data': [
         'data/data.xml',
         'security/security.xml',
