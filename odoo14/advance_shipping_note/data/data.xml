@@ -1,0 +1,11 @@
+<odoo>
+    <data>
+        <record id="seq_purchase_order_shipment" model="ir.sequence">
+            <field name="name">Purchase Shipments</field>
+            <field name="code">purchase.order.shipment</field>
+            <field name="prefix">ASN/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

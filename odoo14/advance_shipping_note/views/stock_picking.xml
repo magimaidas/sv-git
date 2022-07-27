@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_picking_form_inherit_shipping" model="ir.ui.view">
+        <field name="name">stock.picking.form.inherit.shipping</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//sheet//group[last()]" position="inside">
+                <group>
+                    <field name="show_shipments" invisible='1' />
+                    <field name="approved_shipments_ids" invisible='1' />
+                    <field name="show_details" invisible='1' />
+                    <field name="show_reserved" invisible='1' />
+
+
+                    <field name="fetch_done_qty"
+                    attrs="{'invisible': ['|', '|', ('show_shipments', '=', False), ('show_details', '=', False), ('show_reserved','=', False)],'readonly': [('state', '=', 'done')],}" />
+
+                    <field name="shipments_ids" options="{'no_create': True}" 
+                    domain="[('id','in',approved_shipments_ids)]" 
+                    attrs="{'invisible': ['|', '|', ('fetch_done_qty', '=', False), ('show_details', '=', False), ('show_reserved','=', False)],'readonly': [('state', '=', 'done')],}" />
+
+                    <button name="fetch_qty_done" string="Fetch Quantity Received from Shipment" 
+                    confirm="This Operation will reset all done quantity and fetch quantity received from Shipment Selected."
+                    attrs="{'invisible': ['|', '|', '|', ('fetch_done_qty', '=', False),('state', 'in', ['done','cancel']), ('show_details', '=', False), ('show_reserved','=', False)]}" type="object" class="oe_highlight" />
+                </group>
+                <div attrs="{'invisible': [('show_shipments', '=', False)]}">
+                    <h4 attrs="{'invisible': [('show_details', '=', True), ('show_reserved','=', True)]}" style="color:red;">Enable Show details Operations and Pre-fill Detailed Operations options.</h4>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
