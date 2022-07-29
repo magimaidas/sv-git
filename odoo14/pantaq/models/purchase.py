@@ -91,6 +91,11 @@ class PurchaseOrder(models.Model):
     def action_set_date_planned(self):
         print("action_set_date_planned --- Dummy action")
 
+    def button_confirm(self):
+        for order in self:
+            if order.po_type == 'rfq' and order.state == 'qtn_received':
+                order.state = 'draft'
+                super(PurchaseOrder, order).button_confirm()
 
     @api.model
     def _prepare_IntQuotation(self, rfq):

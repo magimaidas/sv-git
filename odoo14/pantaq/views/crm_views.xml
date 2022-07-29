@@ -552,16 +552,16 @@
             </field>
         </record>
 
-        <!--        <record model="ir.ui.view" id="view_crm_enquiry_graph">-->
-        <!--            <field name="name">crm.lead.view.graph</field>-->
-        <!--            <field name="model">crm.lead</field>-->
-        <!--            <field name="inherit_id" ref="crm.crm_lead_view_graph"/>-->
-        <!--            <field name="arch" type="xml">-->
-        <!--                <field name="name" position="replace">-->
-        <!--                    <field name="enq_number" type="row"/>-->
-        <!--                </field>-->
-        <!--            </field>-->
-        <!--        </record>-->
+<!--        <record model="ir.ui.view" id="view_crm_enquiry_graph">-->
+<!--            <field name="name">crm.lead.view.graph</field>-->
+<!--            <field name="model">crm.lead</field>-->
+<!--            <field name="inherit_id" ref="crm.crm_lead_view_graph"/>-->
+<!--            <field name="arch" type="xml">-->
+<!--                <field name="user_id" position="replace">-->
+<!--                    <field name="enq_number" type="row"/>-->
+<!--                </field>-->
+<!--            </field>-->
+<!--        </record>-->
 
         <!--
             Lead Menu (Opportunity):
@@ -576,7 +576,7 @@
                 'stage_type': 'opportunity',
                 'default_type': 'opportunity',
                 'default_user_id': uid,
-                <!--                'search_default_assigned_to_me': 0,-->
+                'search_default_assigned_to_me': 0,
                 }
             </field>
             <field name="search_view_id" ref="pantaq.view_crm_enquiry_search"/>
@@ -596,35 +596,35 @@
         <record id="crm.crm_lead_opportunities_view_kanban" model="ir.actions.act_window.view">
             <field name="sequence" eval="0"/>
             <field name="view_mode">kanban</field>
-            <!--        <field name="view_id" ref="view_crm_enquiry_kanban"/>-->
+            <field name="view_id" ref="view_crm_enquiry_kanban"/>
             <field name="act_window_id" ref="crm.crm_case_tree_view_oppor"/>
         </record>
 
         <record id="crm.crm_lead_view_form" model="ir.actions.act_window.view">
             <field name="sequence" eval="4"/>
             <field name="view_mode">form</field>
-            <!--        <field name="view_id" ref="view_crm_enquiry_form"/>-->
+            <field name="view_id" ref="view_crm_enquiry_form"/>
             <field name="act_window_id" ref="crm.crm_case_tree_view_oppor"/>
         </record>
 
         <record id="crm.crm_lead_opportunities_view_tree" model="ir.actions.act_window.view">
             <field name="sequence" eval="1"/>
             <field name="view_mode">tree</field>
-            <!--            <field name="view_id" ref="view_crm_enquiry_tree"/>-->
+            <field name="view_id" ref="view_crm_enquiry_tree"/>
             <field name="act_window_id" ref="crm.crm_case_tree_view_oppor"/>
         </record>
 
         <record id="crm.crm_lead_view_graph" model="ir.actions.act_window.view">
             <field name="sequence" eval="3"/>
             <field name="view_mode">graph</field>
-            <!--            <field name="view_id" ref="pantaq.view_crm_enquiry_graph"/>-->
+<!--            <field name="view_id" ref="pantaq.view_crm_enquiry_graph"/>-->
             <field name="act_window_id" ref="crm.crm_case_tree_view_oppor"/>
         </record>
 
         <record id="crm.crm_lead_view_pivot" model="ir.actions.act_window.view">
             <field name="sequence" eval="4"/>
             <field name="view_mode">pivot</field>
-            <!--            <field name="view_id" ref="crm.crm_lead_view_pivot"/>-->
+            <field name="view_id" ref="crm.crm_lead_view_pivot"/>
             <field name="act_window_id" ref="crm.crm_case_tree_view_oppor"/>
         </record>
 

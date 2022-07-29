@@ -129,7 +129,7 @@
                                 <span t-esc="i"/>
                                 <t t-set="i" t-value="i+1"/>
                             </td>
-                            <td style="padding: 0.5rem;" class="text-center">
+                            <td style="padding: 1rem;" class="text-center">
                                 <span t-field="order_line.name"/>
                             </td>
                             <td style="padding: 0.5rem;" class="text-center">

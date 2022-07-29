@@ -152,6 +152,7 @@ class Lead(models.Model):
 
         self.ensure_one()
         purchase_id = self.env['purchase.order'].search([('lead_id','=',self.id)])
+        purchase_id = purchase_id.filtered(lambda x: x.state not in ('cancel'))
         internal_quote_id = self.env['internal.order']
         vals=[]
         io_id = self.env['internal.order'].search([('lead_id','=',self.id),('state','=','draft')])
@@ -166,7 +167,7 @@ class Lead(models.Model):
 
         if purchase_id:
             for line in purchase_id:
-                if line.state =='qtn_received':
+                if line.state in ('qtn_received','purchase'):
                     for lines in line.order_line:
                         if lines.rfq_status == 'approved':
                             vals.append([0,0,{

@@ -2,32 +2,23 @@
 {
     'name': "Pantaq",
     'summary': "Module created for Pantaq to handle Procurement process",
-    'sequence': 55,
     'author': 'Systems Valley Ltd.,',
+    'license' : 'OPL-1',
+    'maintainer':'Systems Valley Pvt Ltd.,',
     'description': """
 Pantaq
 ====================
 Handles Logistics and Supply Chain process to aid Procurement specialists,
 who help companies achieve substantial cost savings on any area of spend.
 
-
     """,
     'website': 'https://www.pantaq.com',
-
-    # Categories can be used to filter modules in modules listing
-    # Check https://github.com/odoo/odoo/blob/12.0/odoo/addons/base/data/ir_module_category_data.xml
-    # for the full list
-    'category' : 'Logistics and Supply Chain',
+    'category': 'Logistics and Supply Chain',
     'version': '1.1',
-
-    # any module necessary for this one to work correctly
-    'depends': ['base','crm','sale_crm','uom','purchase','hr','delivery','stock','web'],
-
-    # always loaded
+    'depends': ['base','crm','sale_crm','uom','purchase','purchase_stock','hr','delivery','stock','web'],
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
-
         'data/crm_stage_data.xml',
         'data/data.xml',
         'data/email_templates.xml',
@@ -41,11 +32,8 @@ who help companies achieve substantial cost savings on any area of spend.
         'views/terms_condition_view.xml',
         'views/templates.xml',
         'views/account_invoice_view.xml',
-
         'views/sale_views.xml',
         'views/purchase_views.xml',
-        # 'views/enquiry_assets.xml',
-
         'report/report_layout.xml',
         'report/purchase_order_templates.xml',
         'report/purchase_quotation_templates.xml'

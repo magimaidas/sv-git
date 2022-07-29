@@ -7,7 +7,7 @@
     <record model="ir.actions.act_window" id="action_crm_lead_submitted_to_purchase_team">
         <field name="name">Enquiries</field>
         <field name="res_model">crm.lead</field>
-        <field name="view_mode">kanban,tree,graph,pivot,form,calendar,activity</field>
+        <field name="view_mode">kanban,tree,form,graph,pivot,calendar,activity</field>
         <field name="domain">['|', '|', '|', ('assign_id','=',False), ('assign_id','=',uid),
             ('assign_id.sale_team_id.user_id','=',uid), ('transferred_to', '=', uid)]
         </field>
@@ -29,7 +29,7 @@
     <record id="action_crm_lead_submitted_to_purchase_team_kanban" model="ir.actions.act_window.view">
         <field name="sequence" eval="0"/>
         <field name="view_mode">kanban</field>
-<!--        <field name="view_id" ref="view_crm_enquiry_kanban"/>-->
+        <field name="view_id" ref="view_crm_enquiry_kanban"/>
         <field name="act_window_id" ref="action_crm_lead_submitted_to_purchase_team"/>
     </record>
 
@@ -50,7 +50,7 @@
     <record id="action_crm_lead_submitted_to_purchase_team_graph" model="ir.actions.act_window.view">
         <field name="sequence" eval="3"/>
         <field name="view_mode">graph</field>
-<!--        <field name="view_id" ref="pantaq.view_crm_enquiry_graph"/>-->
+<!--                <field name="view_id" ref="pantaq.view_crm_enquiry_graph"/>-->
         <field name="act_window_id" ref="action_crm_lead_submitted_to_purchase_team"/>
     </record>
 
@@ -129,6 +129,15 @@
                             <field name="invoice_count" widget="statinfo" string="Vendor Bills"/>
                             <field name='invoice_ids' invisible="1"/>
                         </button>
+
+                        <button type="object"
+                                name="action_view_picking"
+                                class="oe_stat_button"
+                                icon="fa-truck" attrs="{'invisible':[('picking_ids','=',[])]}">
+                            <field name="picking_count" widget="statinfo" string="Receipt" help="Incoming Shipments"/>
+                            <field name="picking_ids" invisible="1"/>
+                        </button>
+
                     </div>
                     <div class="oe_title">
                         <span class="o_form_label" attrs="{'invisible': [('state','not in',('draft','sent'))]}">Request
@@ -220,10 +229,12 @@
                                     <field name="rfq_status" readonly="1"/>
                                     <field name="target_currency_id" invisible="1"/>
                                     <button name="button_toggle_approve"
-                                            attrs="{'invisible': ['|',('rfq_status', '=', 'approved'),('state','in',('purchase','cancel'))]}" string="Approve"
+                                            attrs="{'invisible': ['|',('rfq_status', '=', 'approved'),('state','in',('purchase','cancel'))]}"
+                                            string="Approve"
                                             type="object" icon="fa-check"/>
                                     <button name="button_toggle_reject"
-                                            attrs="{'invisible': ['|',('rfq_status', '=', 'rejected'),('state','in',('purchase','cancel'))]}" string="Reject"
+                                            attrs="{'invisible': ['|',('rfq_status', '=', 'rejected'),('state','in',('purchase','cancel'))]}"
+                                            string="Reject"
                                             type="object" icon="fa-times"/>
                                 </tree>
                                 <form string="Order Line">
@@ -507,7 +518,7 @@
                             />
                             <field name="partner_ref"/>
                             <field name="currency_id" groups="base.group_multi_currency"/>
-<!--                            <field name="rfq_ref" attrs="{'invisible': [('rfq_ref','=',False)]}"/>-->
+                            <!--                            <field name="rfq_ref" attrs="{'invisible': [('rfq_ref','=',False)]}"/>-->
                         </group>
                         <group>
                             <field name="date_order"/>

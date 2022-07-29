@@ -20,6 +20,10 @@ class wizardRFQ(models.TransientModel):
 
         lead_id = self._context.get('lead_id', False)
 
+        partners = self.env['res.partner'].search([('is_company', '=', True)])
+        vendors = list(map(lambda x: x.id, partners))
+        domain += [('id', 'in', vendors)]
+
         if lead_id:
             rfqs = self.env['purchase.order'].search([('lead_id', '=', lead_id)])
             vendors = list(map(lambda x: x.partner_id.id, rfqs))
