@@ -95,7 +95,9 @@ class PurchaseOrder(models.Model):
         for order in self:
             if order.po_type == 'rfq' and order.state == 'qtn_received':
                 order.state = 'draft'
-                super(PurchaseOrder, order).button_confirm()
+                return super(PurchaseOrder, order).button_confirm()
+            else:
+                return super(PurchaseOrder, order).button_confirm()
 
     @api.model
     def _prepare_IntQuotation(self, rfq):
