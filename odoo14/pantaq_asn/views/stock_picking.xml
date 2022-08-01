@@ -1,77 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+
     <record id="pq_view_picking_form_inherit" model="ir.ui.view">
         <field name="name">stock.picking.form.inherit</field>
         <field name="model">stock.picking</field>
         <field name="inherit_id" ref="stock.view_picking_form"/>
         <field eval="12" name="priority"/>
         <field name="arch" type="xml">
-            <xpath expr="/form/sheet/notebook/page/field[@name='move_ids_without_package']/tree/field[@name='product_uom']"
+            <xpath expr="/form/sheet/notebook/page/field[@name='move_ids_without_package']/tree/field[@name='lot_ids']"
                    position="after">
-                <button name="button_approve" help="Click for Done"
-                        attrs="{'invisible': ['|',('parent.state', 'in', ('done','cancel','locked')),('state','in',('done','cancel'))]}"
-                        string="Done"
-                        type="object" icon="fa-check"/>
-                <button name="button_scrap" help="Click for Scrap"
-                        attrs="{'invisible': ['|',('parent.state', 'in', ('done','cancel','locked')),('state','not in',('done'))]}"
-                        string="Scrap"
-                        type="object" icon="fa-times"/>
-                <button name="button_return" help="Click for Return"
-                        attrs="{'invisible': ['|',('parent.state', 'in', ('done','cancel','locked')),('state','not in',('done'))]}"
-                        string="Return"
-                        type="object" icon="fa-reply"/>
-            </xpath>
-            <!--            <xpath expr="/form/sheet/notebook/page/field[@name='move_ids_without_package']/tree/button[@name='action_show_details']"-->
-            <!--                   position="replace">-->
-            <!--                <button name="action_show_details" type="object" icon="fa-list" width="0.1"-->
-            <!--                        attrs="{'invisible': ['|',('show_details_visible', '=', False),('scrapped','=',True)]}"-->
-            <!--                        options='{"warn": true}'/>-->
-            <!--            </xpath>-->
-
-            <xpath expr="/form/sheet/notebook/page/field[@name='move_ids_without_package']/tree/field[@name='quantity_done']"
-                   position="replace">
-                <field name="quantity_done" string="Done"
-                       attrs="{'readonly': [('is_quantity_done_editable', '=', False)]}"/>
-
-            </xpath>
-            <xpath expr="/form/sheet/notebook/page/field[@name='move_ids_without_package']/tree/button[@name='action_assign_serial']"
-                   position="replace">
-                <button name="action_assign_serial" type="object"
-                        icon="fa-plus-square"
-                        width="0.1"
-                        role="img" title="Assign Serial Numbers"
-                        attrs="{'invisible': ['|', '|', ('display_assign_serial', '=', False), ('show_operations', '=', False),('scrapped','=',True)]}"/>
+                <field name="attachment" readonly="1"/>
             </xpath>
         </field>
     </record>
-    <record id="pq_stock_scrap_form_view_inherit" model="ir.ui.view">
-        <field name="name">pq.stock.scrap.form.inherit</field>
-        <field name="model">stock.scrap</field>
-        <field name="inherit_id" ref="stock.stock_scrap_form_view"/>
-        <field eval="12" name="priority"/>
+
+    <record id="stock_return_picking_form_inherit_pq" model="ir.ui.view">
+        <field name="name">stock.return.picking.pq</field>
+        <field name="inherit_id" ref="stock.view_stock_return_picking_form"/>
+        <field name="model">stock.return.picking</field>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='lot_id']" position="replace">
-                <field name="lot_id" domain="[('id', 'in', self.move_line_ids.lot_ids)]"
-                       context="{'default_product_id': product_id, 'default_company_id': company_id}"
-                       attrs="{'invisible': ['|',('product_id', '=', False),('tracking', '=', 'none')], 'required': [('tracking', '!=', 'none')]}"
-                       groups="stock.group_production_lot"/>
+            <xpath expr="//field[@name='product_return_moves']/tree" position="inside">
+                <field name="attachment" widget="image" string="Attachments" class="oe_inline"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="view_picking_form_inherit_shipping" model="ir.ui.view">
+        <field name="name">stock.picking.form.inherit.shipping</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet//group[last()]" position="inside">
+                <group>
+                    <field name="show_shipments" invisible='1'/>
+                    <field name="approved_shipments_ids" invisible='1'/>
+                    <field name="show_details" invisible='1'/>
+                    <field name="show_reserved" invisible='1'/>
+
+
+                    <field name="fetch_done_qty"
+                           attrs="{'invisible': [('show_shipments', '=', False)],'readonly': [('state', '=', 'done')],}"/>
+
+                    <field name="shipments_ids" options="{'no_create': True}"
+                           domain="[('id','in',approved_shipments_ids)]"
+                           attrs="{'invisible': ['|', '|', ('fetch_done_qty', '=', False), ('show_details', '=', False), ('show_reserved','=', False)],'readonly': [('state', '=', 'done')],}"/>
+
+                    <button name="fetch_qty_done" string="Fetch Quantity Received from Shipment"
+                            confirm="This Operation will reset all done quantity and fetch quantity received from Shipment Selected."
+                            attrs="{'invisible': ['|', '|', '|', ('fetch_done_qty', '=', False),('state', 'in', ['done','cancel']), ('show_details', '=', False), ('show_reserved','=', False)]}"
+                            type="object" class="oe_highlight"/>
+                </group>
             </xpath>
         </field>
     </record>
 
-<!--    <record id="pq_stock_return_picking_inherit" model="ir.ui.view">-->
-<!--        <field name="name">pq.stock.return.picking.inherit.form</field>-->
-<!--        <field name="inherit_id" ref="stock.view_stock_return_picking_form"/>-->
-<!--        <field name="model">stock.return.picking</field>-->
-<!--        <field name="arch" type="xml">-->
-<!--            <xpath expr="//field[@name='product_return_moves']/tree" position="inside">-->
-<!--                <field name="lot_id" domain="[('id', 'in', self.product_return_moves.move_id.move_line_ids.lot_ids)]"/>-->
-<!--&lt;!&ndash;                       context="{'default_product_id': product_id, 'default_company_id': company_id}"&ndash;&gt;-->
-<!--&lt;!&ndash;                       attrs="{'invisible': ['|',('product_id', '=', False),('tracking', '=', 'none')], 'required': [('tracking', '!=', 'none')]}"&ndash;&gt;-->
-<!--&lt;!&ndash;                       groups="stock.group_production_lot"/>/>&ndash;&gt;-->
-<!--            </xpath>-->
-<!--        </field>-->
-<!--    </record>-->
+    <record id="stock.action_picking_tree_all" model="ir.actions.act_window">
+        <field name="name">Transfers</field>
+        <field name="res_model">stock.picking</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">tree,kanban,form,calendar</field>
+        <field name="domain">[('name','not ilike', 'INT')]</field>
+        <field name="context">{'contact_display': 'partner_address', 'default_company_id': allowed_company_ids[0]}
+        </field>
+        <field name="search_view_id" ref="stock.view_picking_internal_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No transfer found. Let's create one!
+            </p>
+            <p>
+                Transfers allow you to move products from one location to another.
+            </p>
+        </field>
+    </record>
+
+
+    <record id="action_picking_qc" model="ir.actions.act_window">
+        <field name="name">Quality Checks</field>
+        <field name="res_model">stock.picking</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('name','ilike', 'INT')]</field>
+        <field name="context">{'contact_display': 'partner_address', 'default_company_id': allowed_company_ids[0]}
+        </field>
+        <field name="search_view_id" ref="stock.view_picking_internal_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No transfer found. Let's create one!
+            </p>
+            <p>
+                Transfers allow you to move products from one location to another.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="all_picking_qc" name="Quality Check" parent="stock.menu_stock_warehouse_mgmt" sequence="6"
+              action="action_picking_qc" groups="stock.group_stock_manager,stock.group_stock_user"/>
+
 </odoo>
-
-

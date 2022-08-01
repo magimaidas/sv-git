@@ -1,43 +1,28 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "pantaq_asn",
-
-    'summary': """
-        Short (1 phrase/line) summary of the module's purpose, used as
-        subtitle on modules listing or apps.openerp.com""",
-
-    'description': """
-        Long description of module's purpose
-    """,
-
+    'name': 'Advance shipping note',
+    'summary': "Create ASN of Purchase Order and align stock transfer as per shipments",
     'author': "Systems Valley",
-    'website': "http://www.yourcompany.com",
-
-    # Categories can be used to filter modules in modules listing
-    # Check https://github.com/odoo/odoo/blob/14.0/odoo/addons/base/data/ir_module_category_data.xml
-    # for the full list
+    'website': 'https://www.pantaq.com',
+    'category': 'Logistics and Supply Chain',
     'category': 'Purchase',
-    'version': '0.1',
-
-    # any module necessary for this one to work correctly
-    'depends': ['base','pantaq','purchase','purchase_stock','delivery','stock'],
-
-    # always loaded
+    'version': '14.0.0.1',
+    'depends': ['base','purchase','stock','pantaq'],
     'data': [
         'security/ir.model.access.csv',
+        'security/purchase_order_shipment_security.xml',
         'data/data.xml',
         'views/purchase_order.xml',
-        'views/inventory_asn_menu.xml',
+        'views/purchase_order_shipment.xml',
         'views/stock_picking.xml',
-        # 'static/description/index.html',
+        'views/stock_scrap.xml',
+    ],
 
-    ],
-    # only loaded in demonstration mode
-    'demo': [
-        # 'demo/demo.xml',
-    ],
-    'installable': True,
     'application': True,
-    'auto_install': False,
+    'installable': True,
+    'post_init_hook': '_warehouse_settings',
     'sequence': 1,
+
 }
+
+

@@ -1,12 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="1">
-
-        <!-- Sequences for purchase.asn -->
-        <record id="seq_pq_purchase_asn" model="ir.sequence">
-            <field name="name">ASN</field>
-            <field name="code">purchase.asn</field>
-            <field name="prefix">ASN</field>
+    <data>
+        <record id="seq_purchase_order_shipment" model="ir.sequence">
+            <field name="name">Advance Shipping Note</field>
+            <field name="code">purchase.order.shipment</field>
+            <field name="prefix">ASN/</field>
             <field name="padding">5</field>
             <field name="company_id" eval="False"/>
         </record>

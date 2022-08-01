@@ -1,165 +1,121 @@
-from odoo import api, fields, models, SUPERUSER_ID, _
-from odoo.exceptions import AccessError, UserError, ValidationError
-import logging
-from collections import namedtuple
-
-from odoo import _, _lt, api, fields, models
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 
-class StockMove(models.Model):
-    _inherit = "stock.move"
-
-    def button_approve(self):
-        self._action_done()
-
-    def button_scrap(self):
-        if self and not self.scrapped and self.quantity_done > 0:
-            scrap = self.env['stock.scrap']
-            vals = {}
-            vals['product_id'] = self.product_id.id
-            vals['scrap_qty'] = self.quantity_done
-            vals['origin'] = self.origin
-            vals['company_id'] = self.company_id.id
-            vals['date_done'] = fields.Datetime.now()
-            vals['product_uom_id'] = self.product_uom.id
-            result = scrap.create(vals)
-            res = result.sudo().action_validate()
-            res.update({
-                'state':'done'
-            })
-            self.scrapped = True
-        else:
-            raise ValidationError('Done quantity is 0, unable to move to scrap!')
-
-    def button_return(self):
-        if self and not self.scrapped and self.quantity_done > 0:
-            picking = self.env['stock.return.picking']
-            result = self._action_done()
-            res = self.picking_id.move_ids_without_package.create_returns()
-            print(res)
-        else:
-            raise ValidationError("Can't return scrapped items (or) Check if done quantity > 0")
-
-
-
-class Picking(models.Model):
-    _inherit = "stock.picking"
-
-    # @api.model
-    # def create(self,vals):
-    #     new_val = super(Picking, self).create(vals)
-
-
-
-    @api.onchange('product_id')
-    def set_domain_for_lot(self):
-        move_lines = self.mapped('move_line_ids')
-        lot_ids = move_lines.mapped('lot_id')
-        res = {}
-        ctx = self.env.context
-        res['domain'] = {'lot_id': [('id', 'in', lot_ids.ids)]}
-        return res
-
-    def button_scrap(self):
-        self.ensure_one()
-        move_lines = self.mapped('move_line_ids')
-        lot_ids = move_lines.mapped('lot_id')
-
-        view = self.env.ref('stock.stock_scrap_form_view2')
-        products = self.env['product.product']
-        lots = self.env['stock.production.lot']
-        for move in self.move_lines:
-            if move.state not in ('draft', 'cancel') and move.product_id.type in ('product', 'consu'):
-                products |= move.product_id
-
-        for move in self.move_lines:
-            if move.state not in ('draft', 'cancel') and move.product_id.type in ('product', 'consu'):
-                products |= move.product_id
-        return {
-            'name': _('Scrap'),
-            'view_mode': 'form',
-            'res_model': 'stock.scrap',
-            'view_id': view.id,
-            'views': [(view.id, 'form')],
-            'type': 'ir.actions.act_window',
-            'domain': [('lot_id', 'in', lot_ids.ids)],
-            'context': {'default_picking_id': self.id, 'product_ids': products.ids,'lot_id.ids':lot_ids.ids,'default_company_id': self.company_id.id},
-            'target': 'new',
-        }
-
-class ReturnPicking(models.TransientModel):
-    _inherit = 'stock.return.picking'
-
-
-    # lot_id = fields.Many2one('stock.production.lot', 'Lot/Serial',related='picking_id.move_line_ids.lot_id', store=False, readonly=False)
-
-    def create_returns(self):
-        res = super(ReturnPicking, self).create_returns()
-        return res
-
-    @api.onchange('lot_id')
-    def set_context(self):
-        print("Hi")
-
-
-class StockReturnPickingLine(models.TransientModel):
+class ReturnPickingLine(models.TransientModel):
     _inherit = "stock.return.picking.line"
 
-    @api.model
-    def default_get(self, fields):
-        result = super().default_get(fields)
-        if self.move_id:
-            result['lot_id'] = self.move_id.lot_ids.ids
-        return result
+    attachment = fields.Image('Attachment', help='Picture of product during return', store=True,copy=False, attachment=True, max_width=1024, max_height=1024)
 
-    @api.model
-    def default_set(self, fields):
-        result = super().default_set(fields)
-        if self.move_id:
-            result['lot_id'] = self.move_id.lot_ids.ids
-        return result
+class StockPickingInherit(models.Model):
+    _inherit = "stock.picking"
 
-    lot_id = fields.Many2one('stock.production.lot', 'Lot/Serial', related='move_id.move_line_ids.lot_id',store=False, readonly=False)
+    def write(self, vals):
+        res = super(StockPickingInherit, self).write(vals)
+        for rec in self:
+            if rec.state == 'done' and rec.fetch_done_qty:
+                rec.approved_shipments_ids.sudo().write({'state': 'done'})
+        return res
 
-    @api.depends('lot_id')
-    def set_context(self):
-        print("Hi")
+    show_shipments = fields.Boolean(string='', compute='compute_shipments_bool_domain', copy=False, required=True)
+    attachment = fields.Image('Attachment', help='Picture of product during return', copy=False, attachment=True, max_width=1024, max_height=1024)
 
+    def compute_shipments_bool_domain(self):
+        for rec in self:
+            valid_po_obj = self.env['purchase.order'].sudo().search(
+                [('name', '=', self.origin), ('is_shipment', '=', True), ])
+            rec.show_shipments = True if valid_po_obj else False
 
-class Warehouse(models.Model):
-    _inherit = "stock.warehouse"
-
-    def _get_sequence_values(self):
-        """ Each picking type is created with a sequence. This method returns
-        the sequence values associated to each picking type.
-        """
-        return {
-            'in_type_id': {
-                'name': self.name + ' ' + ('Sequence in'),
-                'prefix': self.code + '/IN/', 'padding': 5,
-                'company_id': self.company_id.id,
-            },
-            'out_type_id': {
-                'name': self.name + ' ' + ('Sequence out'),
-                'prefix': self.code + '/OUT/', 'padding': 5,
-                'company_id': self.company_id.id,
-            },
-            'pack_type_id': {
-                'name': self.name + ' ' + ('Sequence packing'),
-                'prefix': self.code + '/PACK/', 'padding': 5,
-                'company_id': self.company_id.id,
-            },
-            'pick_type_id': {
-                'name': self.name + ' ' + ('Sequence picking'),
-                'prefix': self.code + '/PICK/', 'padding': 5,
-                'company_id': self.company_id.id,
-            },
-            'int_type_id': {
-                'name': self.name + ' ' + ('Sequence internal'),
-                'prefix': self.code + '/QC/', 'padding': 5,
-                'company_id': self.company_id.id,
-            },
-        }
+    
+    fetch_done_qty = fields.Boolean(string='Fetch Qty from Shipments', default=True, copy=False)
+    shipments_ids = fields.Many2one('purchase.order.shipment', string='Shipments', copy=False)
+    approved_shipments_ids = fields.Many2many('purchase.order.shipment', compute='compute_approved_shipments')
+    show_details = fields.Boolean(related='picking_type_id.show_operations')
+    show_reserved = fields.Boolean(related='picking_type_id.show_reserved')
 
 
+    @api.depends("show_shipments")
+    def compute_approved_shipments(self):        
+        for rec in self:
+            domain_ids = []
+            if rec.show_shipments:
+                domain_ids = self.env['purchase.order'].search(
+                    [('name', '=', rec.origin), ('is_shipment', '=', True), ]).shipments_lines.filtered(
+                    lambda r: r.state == 'confirm').ids
+            rec.approved_shipments_ids = [(6, 0, domain_ids)]
+
+    # def button_validate(self):
+    #     res = super(StockPickingInherit, self).button_validate()
+    #     if 'INT' in self.name:
+    #         self.ensure_one()
+    #         shipments_ids = self.approved_shipments_ids.sudo().filtered(lambda r: r.state == 'confirm')
+    #         if not shipments_ids:
+    #             raise UserError(_("Shipments field is empty. Please add Shipments and then try again."))
+    #
+    #         if self.move_line_ids_without_package:
+    #             self.update_done_qty(self.move_line_ids_without_package, shipments_ids)
+    #             return
+    #         else:
+    #             raise UserError(_("Please Use Detailed Operation in Operation Type"))
+    #
+    #         if self.state == 'done':
+    #             raise UserError(_("Quantity Done can not be fetched in this state"))
+    #
+    #         if not (self.move_line_ids_without_package):  # or self.move_ids_without_package
+    #             raise UserError(_("No Operation for Stock Move Exists"))
+    #
+    #         if not self.picking_type_id.show_operations:
+    #             raise UserError(_("Please Use Detailed Operation in Operation Type"))
+    #     else:
+    #         return res
+
+    @api.depends('move_ids_without_package')
+    def fetch_qty_done(self):
+        self.ensure_one()
+        shipments_ids = self.shipments_ids.sudo().filtered(lambda r: r.state == 'confirm')
+        if not shipments_ids:
+            raise UserError(_("Shipments field is empty. Please add Shipments and then try again."))
+        
+        if self.state == 'done':
+            raise UserError(_("Quantity Done can not be fetched in this state"))          
+        
+        if not (self.move_line_ids_without_package):#or self.move_ids_without_package
+            raise UserError(_("No Operation for Stock Move Exists"))
+
+        if not self.picking_type_id.show_operations:
+            raise UserError(_("Please Use Detailed Operation in Operation Type"))
+          
+        if self.move_line_ids_without_package:
+            self.update_done_qty(self.move_line_ids_without_package, shipments_ids)
+            return
+        else:
+            raise UserError(_("Please Use Detailed Operation in Operation Type"))
+
+
+    
+    def update_done_qty(self,move_lines,shipment):
+        self.ensure_one()
+        move_lines.write({'qty_done':0})
+        mv_lines_stack = []
+
+        
+
+        def update_move_lines(move_line,shipment_line):
+            processed_mv_lines = []
+            if move_line.product_id.tracking == 'serial':
+                for i in range(int(shipment_line.shipment_qty_received)):#for i in range(int(shipment_line.shipment_qty_received))
+                    move_line[i].qty_done = 1
+                    processed_mv_lines.append(move_line[i].id)
+            else:
+                move_line[0].qty_done = shipment_line[0].shipment_qty_received
+                processed_mv_lines.append(move_line[0].id)
+
+            return processed_mv_lines
+        
+        for shipment_lines in shipment.mapped('shipment_lines'):
+            mv_lines = move_lines.filtered(lambda r: (r.product_id.id == shipment_lines.product_id.id and r.id not in mv_lines_stack))
+            mv_lines_stack += update_move_lines(mv_lines,shipment_lines)
+           
+
+      
+        

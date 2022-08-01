@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="pq_view_picking_form_inherit" model="ir.ui.view">
+        <field name="name">stock.picking.form.inherit</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field eval="12" name="priority"/>
+        <field name="arch" type="xml">
+            <xpath expr="/form/sheet/notebook/page/field[@name='move_ids_without_package']/tree/field[@name='product_uom']"
+                   position="after">
+                <button name="button_approve" help="Click for Done"
+                        attrs="{'invisible': [('parent.state', 'in', ('done','cancel','locked'))]}"
+                        string="Done"
+                        type="object" icon="fa-check"/>
+                <button name="button_scrap" help="Click for Scrap"
+                        attrs="{'invisible': [('parent.state', 'in', ('done','cancel','locked'))]}"
+                        string="Scrap"
+                        type="object" icon="fa-times"/>
+                <button name="button_return" help="Click for Return"
+                        attrs="{'invisible': [('parent.state', 'in', ('done','cancel','locked'))]}"
+                        string="Return"
+                        type="object" icon="fa-reply"/>
+            </xpath>
+            <xpath expr="/form/sheet/notebook/page/field[@name='move_ids_without_package']/tree/button[@name='action_show_details']"
+                   position="replace">
+                <button name="action_show_details" type="object" icon="fa-list" width="0.1"
+                        attrs="{'invisible': ['|',('show_details_visible', '=', False),('scrapped','=',True)]}"
+                        options='{"warn": true}'/>
+            </xpath>
+            <xpath expr="/form/sheet/notebook/page/field[@name='move_ids_without_package']/tree/button[@name='action_assign_serial']"
+                   position="replace">
+                <button name="action_assign_serial" type="object"
+                        icon="fa-plus-square"
+                        width="0.1"
+                        role="img" title="Assign Serial Numbers"
+                        attrs="{'invisible': ['|', '|', ('display_assign_serial', '=', False), ('show_operations', '=', False),('scrapped','=',True)]}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
+
+

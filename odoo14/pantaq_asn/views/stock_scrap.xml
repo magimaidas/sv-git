@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="stock_scrap_inherited_pq" model="ir.ui.view">
+        <field name="name">stock.scrap.pq</field>
+        <field name="model">stock.scrap</field>
+        <field name="inherit_id" ref="stock.stock_scrap_form_view2"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='company_id']" position="after">
+                <field name="image_attach" widget="image" class="o_kanban_image_fill_left"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="stock_scrap_inherited1_pq" model="ir.ui.view">
+        <field name="name">stock.scrap.form.pq</field>
+        <field name="model">stock.scrap</field>
+        <field name="inherit_id" ref="stock.stock_scrap_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="/form/sheet/group/group/div" position="after">
+                <field name="image_attach" string="Attachment" widget="image" class="o_kanban_image_fill_left"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
