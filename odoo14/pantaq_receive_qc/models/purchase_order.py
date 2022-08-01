@@ -22,37 +22,51 @@ class PurchaseOrder(models.Model):
         if flag:
             self.asn_done = True
 
+    # def button_confirm(self):
+    #     for order in self:
+    #         if self.po_type == 'rfq':
+    #             if order.state not in ['draft', 'sent', 'qtn_received', 'rfq_revised']:
+    #                 continue
+    #             if order.po_type == 'rfq':
+    #                 new_order = order.copy()
+    #                 lines = new_order.order_line.filtered(lambda l: l.rfq_status == 'approved')
+    #                 lines_remove = OrderedSet()
+    #                 for line in order.order_line:
+    #                     if line.rfq_status == 'rejected':
+    #                         lines_remove.add(line.id)
+    #                 res = self.env['purchase.order.line'].browse(lines_remove).sudo().unlink()
+    #                 new_order.update({
+    #                     'state': 'done',
+    #                     'po_ref': order.id,
+    #                 })
+    #                 order.rfq_ref = new_order.id
+    #                 order.po_type = 'purchase'
+    #                 order.name = self.env['ir.sequence'].next_by_code('purchase.order') or '/'
+    #
+    #             order._add_supplier_to_product()
+    #             # Deal with double validation process
+    #             if order._approval_allowed():
+    #                 order.button_approve()
+    #             else:
+    #                 order.write({'state': 'to approve'})
+    #             if order.partner_id not in order.message_partner_ids:
+    #                 order.message_subscribe([order.partner_id.id])
+    #         else:
+    #             super(PurchaseOrder, self).button_confirm()
+    #     return True
+
     def button_confirm(self):
         for order in self:
-            if self.po_type == 'rfq':
-                if order.state not in ['draft', 'sent', 'qtn_received', 'rfq_revised']:
-                    continue
-                if order.po_type == 'rfq':
-                    new_order = order.copy()
-                    lines = new_order.order_line.filtered(lambda l: l.rfq_status == 'approved')
-                    lines_remove = OrderedSet()
-                    for line in order.order_line:
-                        if line.rfq_status == 'rejected':
-                            lines_remove.add(line.id)
-                    res = self.env['purchase.order.line'].browse(lines_remove).sudo().unlink()
-                    new_order.update({
-                        'state': 'done',
-                        'po_ref': order.id,
-                    })
-                    order.rfq_ref = new_order.id
-                    order.po_type = 'purchase'
-                    order.name = self.env['ir.sequence'].next_by_code('purchase.order') or '/'
-    
-                order._add_supplier_to_product()
-                # Deal with double validation process
-                if order._approval_allowed():
-                    order.button_approve()
-                else:
-                    order.write({'state': 'to approve'})
-                if order.partner_id not in order.message_partner_ids:
-                    order.message_subscribe([order.partner_id.id])
+            if order.state not in ['draft', 'qtn_received','sent']:
+                continue
+            order._add_supplier_to_product()
+            # Deal with double validation process
+            if order._approval_allowed():
+                order.button_approve()
             else:
-                super(PurchaseOrder, self).button_confirm()
+                order.write({'state': 'to approve'})
+            if order.partner_id not in order.message_partner_ids:
+                order.message_subscribe([order.partner_id.id])
         return True
 
     def create_asn(self):

@@ -40,8 +40,7 @@
                 <xpath expr="//header" position="inside">
                     <field name="asn_done" invisible="1"/>
                     <field name="po_type" invisible="1"/>
-                    <button name="create_asn" string="Create ASN" type="object" class="oe_highlight"
-                            attrs="{'invisible': ['|','|',('asn_done','=',True),('state','not in','purchase'),('po_type','=','rfq')]}"/>
+                    <button name="create_asn" string="Create ASN" type="object" class="oe_highlight"/>
                 </xpath>
                 <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
                     <button type="object"

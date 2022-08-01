@@ -32,6 +32,7 @@
         'views/purchase_order.xml',
         'views/inventory_asn_menu.xml',
         'views/stock_picking.xml',
+        'views/lot_filtering.xml',
     ],
     # only loaded in demonstration mode
     'demo': [

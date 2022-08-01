@@ -5,7 +5,7 @@
             <field name="res_model">stock.picking</field>
             <field name="type">ir.actions.act_window</field>
             <field name="view_mode">tree,form</field>
-            <field name="domain">[('name','ilike', 'QC')]</field>
+            <field name="domain">[('name','ilike', 'INT')]</field>
             <field name="context">{'contact_display': 'partner_address', 'default_company_id': allowed_company_ids[0]}</field>
             <field name="search_view_id" ref="stock.view_picking_internal_search"/>
             <field name="help" type="html">
