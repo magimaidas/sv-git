@@ -1,12 +1,21 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
-from odoo.tools import float_compare, float_round, float_is_zero, OrderedSet
 
 
+class PurchaseOrderLine(models.Model):
+    _inherit = 'purchase.order.line'
+
+    # @api.depends('rfq_status','state')
+    @api.onchange('rfq_status','state')
+    def onchange_rfq_status(self):
+
+        print("Check order status")
 
 class PurchaseOrder(models.Model):
     _inherit = 'purchase.order'
 
+    rfq_ref = fields.Many2one('purchase.order', string="RFQ Reference", readonly=True)
+    po_ref = fields.Many2one('purchase.order', string="PO Reference", readonly=True)
     is_shipment = fields.Boolean(
         string='Shipment', default=True, store=True, copy=False)
 
@@ -14,6 +23,10 @@ class PurchaseOrder(models.Model):
         'purchase.order.shipment', 'purchase_id', string='', copy=False)
     shipments_count = fields.Integer(compute="_compute_shipments", string='Shipment Count', copy=False, default=0,
                                      store=True)
+
+    @api.depends('order_line.rfq_status', 'order_line.state','order_line')
+    def onchange_rfq_status(self):
+        print("Check order status")
 
     @api.onchange('is_shipment')
     def _onchange_is_shipment(self):
@@ -24,6 +37,7 @@ class PurchaseOrder(models.Model):
             )
 
     def _create_shipment_lines_context(self, shipping_ids):
+
         lines = []
         for line in self.order_line:
             shipment_line_qty = shipping_ids.filtered(lambda l: l.state in ['confirm']).mapped(
@@ -44,21 +58,25 @@ class PurchaseOrder(models.Model):
         return lines
 
     def action_open_shipments(self):
+
         shipping_ids = self.mapped('shipments_lines')
         domain = "[('id','in',%s)]" % (shipping_ids.ids)
         context = {
             'default_purchase_id': self.id,
         }
-        return {
+        result = {
             'name': _("Advance Shipping Note"),
-            'view_mode': 'tree,form',
             'view_id': False,
-            'view_type': 'form',
             'res_model': 'purchase.order.shipment',
             'type': 'ir.actions.act_window',
-            'domain': domain,
-            'context': context
         }
+        if len(shipping_ids) == 1:
+            result.update({'view_mode':'form','view_type': 'form','res_id': shipping_ids.id})
+        if len(shipping_ids) > 1:
+            result.update({'view_mode':'tree,form','view_type': 'form','domain': domain,'context': context,'res_ids':shipping_ids.ids})
+        if not shipping_ids:
+            result.update({'view_mode': 'form', 'view_type': 'form','domain': domain, 'context': context})
+        return result
 
     @api.depends('shipments_lines')
     def _compute_shipments(self):

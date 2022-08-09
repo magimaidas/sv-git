@@ -7,6 +7,16 @@ class ReturnPickingLine(models.TransientModel):
 
     attachment = fields.Image('Attachment', help='Picture of product during return', store=True,copy=False, attachment=True, max_width=1024, max_height=1024)
 
+
+class ReturnPicking(models.TransientModel):
+    _inherit = 'stock.return.picking'
+
+    def create_returns(self):
+        res = super(ReturnPicking, self).create_returns()
+        pick = self.env[res['res_model']].browse(res['res_id'])
+        return res
+
+
 class StockPickingInherit(models.Model):
     _inherit = "stock.picking"
 
@@ -14,6 +24,10 @@ class StockPickingInherit(models.Model):
         res = super(StockPickingInherit, self).write(vals)
         for rec in self:
             if rec.state == 'done' and rec.fetch_done_qty:
+                for line_id in rec.approved_shipments_ids.shipment_lines:
+                    for move in rec.move_ids_without_package:
+                        if move.product_id == line_id.product_id:
+                            line_id.sudo().write({'qty_received':move.quantity_done, 'remaining_qty':line_id.shipment_qty_received-move.quantity_done})
                 rec.approved_shipments_ids.sudo().write({'state': 'done'})
         return res
 

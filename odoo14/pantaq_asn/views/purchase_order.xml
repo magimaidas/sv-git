@@ -7,8 +7,33 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='partner_id']" position="after">
                     <field
-                    attrs="{'readonly': [('state', 'in', ['purchase','done'])]}"
-                    name="is_shipment"/>
+                            attrs="{'readonly': [('state', 'in', ['purchase','done'])]}"
+                            name="is_shipment"/>
+                </xpath>
+
+                <xpath expr="//div[hasclass('oe_button_box')]/button" position="before">
+                    <button name="action_open_shipments" class="oe_stat_button"
+                            icon="fa-ship" type="object"
+                            attrs="{'invisible': ['|',('is_shipment', '!=', True),('state', 'not in', ['purchase'])]}">
+                        <field
+                                name="shipments_count"
+                                widget="statinfo" string="ASN" />
+                    </button>
+                </xpath>
+                <xpath expr="//field[@name='currency_id']" position="after">
+                    <field name="rfq_ref" string="RFQ Reference" attrs="{'invisible':[('rfq_ref','=',False)]}"/>
+                    <field name="po_ref" string="PO Reference" attrs="{'invisible':[('po_ref','=',False)]}"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="pq_view_purchase_order_form_inherit" model="ir.ui.view">
+            <field name="name">pq_view_purchase_order_form_inherit</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='partner_id']" position="after">
+                    <field attrs="{'readonly': [('state', 'in', ['purchase','done'])]}" name="is_shipment"/>
                 </xpath>
 
                 <xpath expr="//div[hasclass('oe_button_box')]/button" position="before">
@@ -20,8 +45,13 @@
                                 widget="statinfo" string="ASN"/>
                     </button>
                 </xpath>
+                <xpath expr="//field[@name='currency_id']" position="after">
+                    <field name="rfq_ref" string="RFQ Reference" attrs="{'invisible':[('rfq_ref','=',False)]}"/>
+                </xpath>
+                <xpath expr="//field[@name='currency_id']" position="after">
+                    <field name="po_ref" string="PO Reference" attrs="{'invisible':[('po_ref','=',False)]}"/>
+                </xpath>
             </field>
         </record>
-
     </data>
 </odoo>

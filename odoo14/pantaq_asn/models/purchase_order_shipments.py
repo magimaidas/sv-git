@@ -103,6 +103,6 @@ class PurchaseOrderShipmentLine(models.Model):
     @api.constrains("remaining_qty", "shipment_qty_received")
     def constrains_shipment_qty_received(self):
         for record in self:
-            if record.shipment_qty_received > record.remaining_qty:
-                raise exceptions.ValidationError(_("Shipment Qty Cannot be greater than Remaining Qty .\n Product [%s]")
+            if record.shipment_qty_received < record.remaining_qty:
+                raise exceptions.ValidationError(_("Remaining Qty Cannot be greater than Shipment Qty .\n Product [%s]")
                  % (record.product_id.name))
