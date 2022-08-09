@@ -11,7 +11,7 @@
         <field name="domain">['|', '|', '|', ('assign_id','=',False), ('assign_id','=',uid),
             ('assign_id.sale_team_id.user_id','=',uid), ('transferred_to', '=', uid)]
         </field>
-        <field name="context">{}</field>
+        <field name="context">{'search_default_stage':1}</field>
         <field name="search_view_id" ref="pantaq.view_crm_enquiry_search"/>
         <field name="help" type="html">
             <p>
@@ -229,11 +229,11 @@
                                     <field name="rfq_status" readonly="1"/>
                                     <field name="target_currency_id" invisible="1"/>
                                     <button name="button_toggle_approve"
-                                            attrs="{'invisible': ['|',('rfq_status', '=', 'approved'),('state','in',('purchase','cancel'))]}"
+                                            attrs="{'invisible': ['|','|',('parent.state','in',('qtn_received','done','cancel')),('rfq_status', '=', 'approved'),('state','in',('purchase','cancel'))]}"
                                             string="Approve"
                                             type="object" icon="fa-check"/>
                                     <button name="button_toggle_reject"
-                                            attrs="{'invisible': ['|',('rfq_status', '=', 'rejected'),('state','in',('purchase','cancel'))]}"
+                                            attrs="{'invisible': ['|','|',('parent.state','in',('qtn_received','done','cancel')),('rfq_status', '=', 'rejected'),('state','in',('purchase','cancel'))]}"
                                             string="Reject"
                                             type="object" icon="fa-times"/>
                                 </tree>
@@ -686,7 +686,7 @@
         <field name="res_model">purchase.order</field>
         <field name="view_mode">tree,kanban,form,pivot,graph,calendar</field>
         <!--        <field name="view_id" ref="purchase_order_form_inherited_pantaq" />-->
-        <field name="context">{'search_default_todo':1, 'show_purchase': True, 'default_po_type':'rfq',
+        <field name="context">{'search_default_todo':1, 'show_purchase': True, 'default_po_type':'purchase',
             'po_type':'purchase'}
         </field>
         <!--<field name="domain">[('state','not in',('draft','sent','bid', 'confirmed'))]</field>-->
@@ -731,7 +731,7 @@
                 <div name="button_box" position="inside">
                     <button class="oe_stat_button" type="action"
                             name="%(action_rfq4lead)d" icon="fa-usd"
-                            context="{'default_partner_id': partner_id, 'search_default_draft': 1}"
+                            context="{'default_partner_id': partner_id, 'default_po_type':'rfq','search_default_po_type': 'rfq'}"
                             groups="purchase.group_purchase_user">
                         <div class="o_stat_info">
                             <field name="rfq_count" class="o_stat_value"/>

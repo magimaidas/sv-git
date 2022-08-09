@@ -152,18 +152,12 @@ class Lead(models.Model):
 
         self.ensure_one()
         purchase_id = self.env['purchase.order'].search([('lead_id','=',self.id)])
-        purchase_id = purchase_id.filtered(lambda x: x.state not in ('cancel'))
+        purchase_id = purchase_id.filtered(lambda x: x.state not in ('cancel') and x.po_type in ('rfq'))
         internal_quote_id = self.env['internal.order']
         vals=[]
         io_id = self.env['internal.order'].search([('lead_id','=',self.id),('state','=','draft')])
-        io_count=0
-        # can write query and optimize - need to be done
-
-        for line in io_id:
-            io_count = io_count+1
-            if io_count >= 1:
-                raise Warning(_("Internal Quotation is already created. Kindly check it !!")) 
-
+        if len(io_id) > 0:
+            raise Warning(_("Internal Quotation is already created. Kindly check it !!"))
 
         if purchase_id:
             for line in purchase_id:
@@ -297,7 +291,10 @@ class Lead(models.Model):
         self.ensure_one()
 
         for case in self:
-            vals = {'state': 'done'}
+
+            stage = self.env['crm.stage'].search([('name','=','Assigned')])
+            vals = {'state': 'done','stage_id':stage.id}
+
             if not case.partner_id:
                 partner = case._create_lead_partner()
                 if partner:

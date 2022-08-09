@@ -219,7 +219,7 @@
                                         <div>
                                             <field name="approval_state" attrs="{'invisible':[('approval_state','=',False)]}" class="oe_inline"/>
                                             <button name="button_toggle_approve"  help="Click this to Approve"
-                                                    attrs="{'invisible': [('show_approval', '=', False)]}" string="" type="object" icon="fa-check"/>
+                                                    attrs="{'invisible': ['|',('parent.state','not in',('sent')),('show_approval', '=', False)]}" string="" type="object" icon="fa-check"/>
                                             <button name="button_toggle_reject"  help="Click this to Reject"
                                                     attrs="{'invisible': [('show_reject', '=', False)]}" string="" type="object" icon="fa-times"/>
                                         </div>

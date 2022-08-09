@@ -218,12 +218,12 @@
 
                         <button name="button_convert_rfq" string="Convert to RFQ"
                                 type="object" class="oe_highlight"
-                                attrs="{'invisible': ['|', '|', ('state', '=', 'cancel'), ('active', '=', False), ('transferred_to_me', '=', True)]}"
+                                attrs="{'invisible': ['|', '|', ('state', 'in', ('cancel','draft')), ('active', '=', False), ('transferred_to_me', '=', True)]}"
                                 context="{'lead_id': active_id}"
                                 groups="purchase.group_purchase_user"/>
                         <!--IQ creation button-->
                         <button name="button_create_InternalQtn" type="object"
-                                attrs="{'invisible': ['|', '|', ('state', '=', 'cancel'), ('active', '=', False), ('transferred_to_me', '=', True)]}"
+                                attrs="{'invisible': ['|', '|', ('state', 'in', ('cancel','draft')), ('active', '=', False), ('transferred_to_me', '=', True)]}"
                                 string="Create Internal Qtn" class="oe_highlight" id="create_internalqtn"
                                 groups="purchase.group_purchase_user"/>
 

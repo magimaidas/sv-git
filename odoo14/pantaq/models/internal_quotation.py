@@ -34,6 +34,16 @@ class InternalOrder(models.Model):
     #     return res
 
 
+    @api.onchange('state')
+    @api.depends('state')
+    def update_state(self):
+        if self.state == 'quoted':
+            lead_id = self.env['crm.lead'].search([('id','=',self.lead_id.id)])
+            if lead_id:
+                lead_id.write({
+                    'stage_id': self.env['crm.stage'].search([('name','=','Customer Quote Sent')]).id if self.env['crm.stage'].search([('name','=','Customer Quote Sent')]).id else lead_id.stage_id.id,
+                })
+
 
     @api.depends('currency_id','order_line.price_total')
     def _amount_all(self):
@@ -447,7 +457,7 @@ class InternalOrder(models.Model):
             # Check: Revision
             if cq:
                 cq = cq[0]
-                ctx = context.copy()
+                ctx = self._context.copy()
                 ctx['callby'] = 'auto'
                 cq = cq.with_context(ctx).action_revised()
                 CQids.append(cq.id)

@@ -6,8 +6,9 @@ from odoo.addons import decimal_precision as dp
 from odoo.exceptions import Warning
 from lxml import etree
 from datetime import datetime
-from dateutil.relativedelta import relativedelta
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
+from odoo.tools import float_compare, float_round, float_is_zero, OrderedSet
+
 
 
 class PurchaseOrder(models.Model):
@@ -27,7 +28,6 @@ class PurchaseOrder(models.Model):
                     line.update({
                         'check_products': False
                         })
-
 
     @api.model
     def fields_view_get(self, view_id=None, view_type=False, toolbar=False, submenu=False):
@@ -93,11 +93,47 @@ class PurchaseOrder(models.Model):
 
     def button_confirm(self):
         for order in self:
-            if order.po_type == 'rfq' and order.state == 'qtn_received':
-                order.state = 'draft'
-                return super(PurchaseOrder, order).button_confirm()
+            if not order.po_type == 'rfq':
+                return super(PurchaseOrder, self).button_confirm()
             else:
-                return super(PurchaseOrder, order).button_confirm()
+                if order.state not in ['draft', 'sent', 'qtn_received', 'rfq_revised']:
+                    continue
+                order.update({'po_type':'purchase'})
+                new_order = order.copy()
+                order.update({'po_type':'rfq'})
+                lines = new_order.order_line.filtered(lambda l: l.rfq_status == 'approved')
+                lines_remove = OrderedSet()
+                for line in order.order_line:
+                    if line.rfq_status == 'rejected':
+                        lines_remove.add(line.id)
+                res = self.env['purchase.order.line'].browse(lines_remove).sudo().unlink()
+                new_order.update({'state': 'done',
+                        'rfq_ref': order.id,
+                    })
+                order.update({
+                    'po_ref' : new_order.id,
+                    'state' : 'done'
+                })
+                # order.po_type = 'purchase'
+                # order.name = self.env['ir.sequence'].next_by_code('purchase.order') or '/'
+
+                new_order._add_supplier_to_product()
+                # Deal with double validation process
+                if new_order._approval_allowed():
+                    new_order.button_approve()
+                else:
+                    new_order.write({'state': 'to approve'})
+                if new_order.partner_id not in new_order.message_partner_ids:
+                    new_order.message_subscribe([new_order.partner_id.id])
+                else:
+                    return super(PurchaseOrder, self).button_confirm()
+                return True
+    # def button_confirm(self):
+    #     for order in self:
+    #         if not order.po_type == 'rfq': and order.state == 'qtn_received':
+    #             order.state = 'draft'
+    #             return super(PurchaseOrder, order).button_confirm()
+
 
     @api.model
     def _prepare_IntQuotation(self, rfq):
@@ -220,6 +256,10 @@ class PurchaseOrder(models.Model):
 
     
     def button_rfq_done(self):
+        if self.lead_id:
+            stage_id = self.env['crm.stage'].search([('name','=','Quotation Received')])
+            if stage_id:
+                self.lead_id.sudo().write({'stage_id':stage_id.id})
         return self.write({'state':'qtn_received'})
 
 
@@ -412,10 +452,12 @@ class PurchaseOrderLine(models.Model):
         elif not self.org_price_unit:
             raise Warning(_("Please enter the Original Unit price to proceed further!!"))
 
+        self.onchange_rfq_status()
         return self.write({'rfq_status' : 'approved'})
 
     
     def button_toggle_reject(self):
+        self.onchange_rfq_status()
         return self.write({'rfq_status' : 'rejected'})
 
     

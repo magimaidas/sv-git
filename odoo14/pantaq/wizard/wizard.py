@@ -102,7 +102,6 @@ class wizardRFQ(models.TransientModel):
             raise Warning(_("Please add Product Details to proceed further!!"))
 
         for ln in Lines:
-
             if not ln.partner_ids and not DefSupplierIds:
                 raise Warning(_("Please map atleast one Supplier to create RFQ for the product [%s]")%(ln.product_id.name))
 
@@ -114,7 +113,7 @@ class wizardRFQ(models.TransientModel):
         self.create_purchase_order(supplierIDs)
 
             # ln._PQ_action_procurement_create(supplierIDs=supplierIDs)
-
+        res_pool.write({'stage_id':self.env['crm.stage'].search([('name','=','Waiting for Quotation')]).id})
         xml_id = 'purchase_rfq'
         result = self.env.ref('purchase.%s' % (xml_id)).read()[0]
         domain = eval(result['domain']) if result['domain'] else []
